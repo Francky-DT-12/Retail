@@ -423,49 +423,39 @@ def shoes():
 
 import hashlib # You'll need to import hashlib
 
+
 @app.route('/admin_login', methods=['GET', 'POST'])
 @not_admin_logged_in
 def admin_login():
     if request.method == 'POST':
-        # Get user form
         username = request.form['email']
         password_candidate = request.form['password']
+        hashed_password = hashlib.sha256(password_candidate.encode()).hexdigest()
 
-        hashed_password_candidate = hashlib.sha256(password_candidate.encode()).hexdigest()
-
-        # Create cursor
-        cur = mysql.connection.cursor()
-
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         try:
-            result = cur.execute("SELECT * FROM admin WHERE email=%s", [username])
+            cur.execute("SELECT * FROM admin WHERE email = %s", [username])
+            admin = cur.fetchone()
 
-            if result > 0:
-                # Get stored value
-                data = cur.fetchone()
-                stored_password_hash = data['password']
-                uid = data['id']
-                name = data['firstName']
-
-                if hashed_password_candidate == stored_password_hash:
+            if admin:
+                if hashed_password == admin['password']:
+                    # Mettre à jour les clés de session pour être cohérent
                     session['admin_logged_in'] = True
-                    session['admin_uid'] = uid
-                    session['admin_name'] = name
+                    session['admin_id'] = admin['id']  # Utilisez toujours 'admin_id'
+                    session['admin_name'] = admin['firstName']
 
-                    return redirect(url_for('admin'))
-
+                    flash('Connexion réussie', 'success')
+                    return redirect(url_for('admin_profile'))  # Rediriger vers le profil
                 else:
-                    flash('Incorrect password', 'danger')
-                    return render_template('pages/login.html')
-
+                    flash('Mot de passe incorrect', 'danger')
             else:
-                flash('Username not found', 'danger')
-                return render_template('pages/login.html')
+                flash('Email administrateur introuvable', 'danger')
+
         except Exception as e:
-            flash(f'An error occurred: {e}', 'danger')
-            return render_template('pages/login.html')
+            flash(f'Erreur: {str(e)}', 'danger')
         finally:
-            # Close connection
             cur.close()
+
     return render_template('pages/login.html')
 
 
@@ -488,6 +478,72 @@ def admin():
     return render_template('pages/index.html', result=result, row=num_rows, order_rows=order_rows,
                            users_rows=users_rows)
 
+
+@app.route('/admin_profile')
+@is_admin_logged_in
+def admin_profile():
+    try:
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # 1. Récupérer les infos admin
+        cur.execute("SELECT * FROM admin WHERE id = %s", [session['admin_id']])
+        admin = cur.fetchone()
+
+        if not admin:
+            flash('Profil administrateur introuvable', 'danger')
+            return redirect(url_for('admin_login'))
+
+
+        return render_template('pages/admin_profile.html',
+                               admin=admin)
+
+    except Exception as e:
+        flash(f'Erreur: {str(e)}', 'danger')
+        return redirect(url_for('admin'))
+    finally:
+        if 'cur' in locals():
+            cur.close()
+
+
+@app.route('/update_admin_profile', methods=['POST'])
+@is_admin_logged_in
+def update_admin_profile():
+    if request.method == 'POST':
+        try:
+            # Récupère les données du formulaire
+            firstName = request.form['firstName']
+            lastName = request.form['lastName']
+            email = request.form['email']
+            mobile = request.form.get('mobile', '')
+            address = request.form.get('address', '')
+
+            # Validation simple
+            if not firstName or not lastName or not email:
+                flash('Required fields are missing', 'danger')
+                return redirect(url_for('admin_profile'))
+
+            cur = mysql.connection.cursor()
+            cur.execute("""
+                UPDATE admin SET
+                firstName = %s,
+                lastName = %s,
+                email = %s,
+                mobile = %s,
+                address = %s
+                WHERE id = %s
+            """, (firstName, lastName, email, mobile, address, session['admin_id']))
+
+            mysql.connection.commit()
+            flash('Profile updated successfully', 'success')
+
+        except Exception as e:
+            mysql.connection.rollback()
+            flash(f'Error updating profile: {str(e)}', 'danger')
+
+        finally:
+            cur.close()
+
+    return redirect(url_for('admin_profile'))
 
 @app.route('/orders')
 @is_admin_logged_in
