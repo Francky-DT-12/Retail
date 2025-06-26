@@ -1,3 +1,4 @@
+import MySQLdb
 from flask import render_template, flash, redirect, url_for, session, request, logging
 from passlib.hash import sha256_crypt
 import timeit
@@ -512,6 +513,60 @@ def users():
                            users_rows=users_rows)
 
 
+@app.route('/statistiques')
+@is_admin_logged_in
+def statistiques():
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)  # Important pour avoir des dictionnaires
+    stats_data = {}
+
+    try:
+        # 1. Total Number of Users
+        cur.execute("SELECT COUNT(id) FROM users")
+        stats_data['total_users'] = cur.fetchone()['COUNT(id)']
+
+        # 2. Total Number of Products
+        cur.execute("SELECT COUNT(id) FROM products")
+        stats_data['total_products'] = cur.fetchone()['COUNT(id)']
+
+        # 3. Total Number of Orders
+        cur.execute("SELECT COUNT(id) FROM orders")
+        stats_data['total_orders'] = cur.fetchone()['COUNT(id)']
+
+        # 4. Number of Online Users
+        cur.execute("SELECT COUNT(id) FROM users WHERE online = '1'")
+        stats_data['online_users'] = cur.fetchone()['COUNT(id)']
+
+        # 5. Orders by Category (for a chart)
+        # Assuming products table has 'category' and orders table links to products via 'pid'
+        cur.execute("""
+            SELECT p.category as label, COUNT(o.id) as value
+            FROM orders o
+            JOIN products p ON o.pid = p.id
+            GROUP BY p.category
+            ORDER BY value DESC
+        """)
+        stats_data['orders_by_category'] = cur.fetchall()
+
+        # 6. Product Distribution - Format adapté pour Morris Donut
+        cur.execute("""
+            SELECT category as label, COUNT(id) as value
+            FROM products
+            GROUP BY category
+            ORDER BY value DESC
+        """)
+        stats_data['products_by_category'] = cur.fetchall()
+
+    except Exception as e:
+        flash(f'Erreur lors de la récupération des statistiques: {str(e)}', 'danger')
+        stats_data = {
+            'orders_by_category': [],
+            'products_by_category': []
+        }
+    finally:
+        cur.close()
+
+    return render_template('pages/statistics.html', stats=stats_data)
+
 @app.route('/admin_add_product', methods=['POST', 'GET'])
 @is_admin_logged_in
 def admin_add_product():
@@ -709,6 +764,7 @@ def search():
     else:
         flash('Search again', 'danger')
         return render_template('search.html')
+
 
 
 @app.route('/profile')

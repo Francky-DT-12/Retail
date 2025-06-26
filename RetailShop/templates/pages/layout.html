@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin Panel</title>
+    <title>Administration</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -25,7 +25,10 @@
 
     <!-- Custom Fonts -->
     <link href="static/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <!-- Dans le head -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 
+      
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -41,7 +44,9 @@
 
     <!-- Navigation -->
     {% include 'pages/includes/_navbar.html' %}
-    {% block body %} {% endblock %}
+    {% block body %}
+
+    {% endblock %}
     <!-- /#page-wrapper -->
 
 </div>
@@ -63,7 +68,9 @@
 
 <!-- Custom Theme JavaScript -->
 <script src="static/dist/js/sb-admin-2.js"></script>
-
+  <!-- Avant la fermeture du body -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
 </body>
 
 </html>

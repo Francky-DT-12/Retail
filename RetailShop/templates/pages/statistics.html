@@ -1,0 +1,175 @@
+{% extends 'pages/layout.html' %}
+
+{% block body %}
+<style>
+    #morris-bar-chart, #morris-donut-chart {
+    height: 250px;
+    width: 100%;
+}
+</style>
+
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Dashboard - Statistics</h1>
+           {% include 'includes/_flashmsg.html' %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-users fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ stats.total_users|default(0) }}</div>
+                            <div>Total Users</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="panel panel-green">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-shopping-bag fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ stats.total_products|default(0) }}</div>
+                            <div>Total Products</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="panel panel-yellow">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-shopping-cart fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ stats.total_orders|default(0) }}</div>
+                            <div>Total Orders</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="panel panel-red">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-user-circle fa-5x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="huge">{{ stats.online_users|default(0) }}</div>
+                            <div>Online Users</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="#">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Orders by Category
+                </div>
+                <div class="panel-body">
+                    <div id="#morris-bar-chart"></div>
+                    <p class="text-center morris-no-data-bar" style="display: none;">No order data available for charting.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-pie-chart fa-fw"></i> Product Categories Distribution
+                </div>
+                <div class="panel-body">
+                    <div id="#morris-donut-chart"></div>
+                    <p class="text-center morris-no-data-donut" style="display: none;">No product data available for charting.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+    console.log("Initialisation des graphiques...");
+    
+    // Données directement utilisables
+    var ordersData = {{ stats.orders_by_category|tojson|safe }};
+    var productsData = {{ stats.products_by_category|tojson|safe }};
+
+    console.log("Données commandes:", ordersData);
+    console.log("Données produits:", productsData);
+
+    // Graphique en barres
+    if (ordersData && ordersData.length > 0) {
+        Morris.Bar({
+            element: 'morris-bar-chart',
+            data: ordersData,
+            xkey: 'label',
+            ykeys: ['value'],
+            labels: ['Commandes'],
+            barColors: ['#3498db'],
+            hideHover: 'auto'
+        });
+    } else {
+        $('#morris-bar-chart').hide();
+        $('.morris-no-data-bar').show();
+    }
+
+    // Graphique en donut
+    if (productsData && productsData.length > 0) {
+        Morris.Donut({
+            element: 'morris-donut-chart',
+            data: productsData,
+            colors: ['#2ecc71', '#e74c3c', '#f39c12', '#9b59b6'],
+            formatter: function(value) { return value + " produits"; }
+        });
+    } else {
+        $('#morris-donut-chart').hide();
+        $('.morris-no-data-donut').show();
+    }
+});
+</script>
+{% endblock %}

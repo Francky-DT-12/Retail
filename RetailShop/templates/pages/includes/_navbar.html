@@ -7,7 +7,7 @@
             <span class="icon-bar"></span>
         </button>
         {% if 'admin_logged_in' in session%}
-        <a class="navbar-brand" href="/admin">{{ session.admin_name }}</a>
+        <a class="navbar-brand" href="/admin"> {{ session.admin_name }}</a>
         {% else %}
         <a class="navbar-brand" href="/admin">Dashboard</a>
         {% endif %}
@@ -21,12 +21,12 @@
                 <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
             </a>
             <ul class="dropdown-menu dropdown-user">
-                <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                <li><a href="#"><i class="fa fa-user fa-fw"></i> Profil</a>
                 </li>
-                <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                <li><a href="#"><i class="fa fa-gear fa-fw"></i> Parametre</a>
                 </li>
                 <li class="divider"></li>
-                <li><a href="/admin_out"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                <li><a href="/admin_out"><i class="fa fa-sign-out fa-fw"></i> Deconnexion</a>
                 </li>
             </ul>
             <!-- /.dropdown-user -->
@@ -56,6 +56,13 @@
                 <li>
                     <a href="/admin_add_product"><i class="fa fa-edit fa-fw"></i> Add Product</a>
                 </li>
+
+                </li>
+                <li>
+                    <a href="/statistiques"><i class="fa fa-area-chart"></i> Graphe</a>
+                </li>
+
+
             </ul>
         </div>
         <!-- /.sidebar-collapse -->
