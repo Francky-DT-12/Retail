@@ -1,0 +1,231 @@
+{% extends 'pages/layout.html' %}
+
+{% block body %}
+<div class="order-container">
+    <div class="order-card">
+        <div class="order-header">
+            <h4>Gestion de commande {{ order.id}}</h4>
+        </div>
+
+        <div class="order-body">
+            <h5>Détails de la commande</h5>
+            <div class="order-details">
+
+                <div class="detail-item">
+                    <span class="detail-label">Produit :</span>
+                    <span class="detail-value">{{ order.product_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Quantité :</span>
+                    <span class="detail-value">{{ order.quantity }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Client :</span>
+                    <span class="detail-value">
+                        {% if order.uid %}
+                            ID: {{ order.uid }} ({{ order.mobile }})
+                        {% else %}
+                            {{ order.ofname }} ({{ order.mobile }})
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Adresse :</span>
+                    <span class="detail-value">{{ order.oplace }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Date :</span>
+                    <span class="detail-value">{{ order.odate }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Statut :</span>
+                    <span class="status-badge {{ 'pending' if order.dstatus == 'no' else 'completed' }}">
+                        {{ 'Non traité' if order.dstatus == 'no' else 'Traité' }}
+                    </span>
+                </div>
+            </div>
+
+            <form method="post" class="order-actions">
+                <input type="hidden" name="action" value="complete">
+                <button type="submit" class="action-button success">
+                    <i class="fa fa-check-circle"></i> Marquer comme traitée
+                </button>
+
+                <a href="{{ url_for('orders') }}" class="action-button secondary">
+                    <i class="fa fa-arrow-left"></i> Retour aux commandes
+                </a>
+
+                <button type="button" onclick="confirmCancel()" class="action-button danger">
+                    <i class="fa fa-times-circle"></i> Annuler la commande
+                </button>
+            </form>
+
+            <!-- Formulaire caché pour l'annulation -->
+            <form id="cancelForm" method="post" style="display: none;">
+                <input type="hidden" name="action" value="cancel">
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmCancel() {
+    if (confirm("Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible.")) {
+        document.getElementById('cancelForm').submit();
+    }
+}
+</script>
+
+<style>
+    /* Reset et base */
+    .order-container {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    /* Centrage vertical et horizontal */
+    .order-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    /* Carte principale */
+    .order-card {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    /* En-tête */
+    .order-header {
+        background: #4e73df;
+        color: white;
+        padding: 15px 20px;
+        text-align: center;
+    }
+
+    .order-header h4 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    /* Corps */
+    .order-body {
+        padding: 20px;
+    }
+
+    .order-body h5 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #2e3a4e;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    /* Détails de la commande */
+    .order-details {
+        margin-bottom: 25px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: bold;
+        color: #495057;
+        min-width: 120px;
+    }
+
+    .detail-value {
+        color: #6c757d;
+        text-align: right;
+        flex-grow: 1;
+    }
+
+    /* Badge de statut */
+    .status-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-badge.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    /* Actions */
+    .order-actions {
+        display: grid;
+        gap: 12px;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .action-button i {
+        margin-right: 8px;
+    }
+
+    .action-button.success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .action-button.success:hover {
+        background-color: #218838;
+    }
+
+    .action-button.secondary {
+        background-color: transparent;
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+
+    .action-button.secondary:hover {
+        background-color: #f8f9fa;
+    }
+
+    .action-button.danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .action-button.danger:hover {
+        background-color: #c82333;
+    }
+</style>
+{% endblock %}

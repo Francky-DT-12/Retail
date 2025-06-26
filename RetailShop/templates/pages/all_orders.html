@@ -93,30 +93,45 @@
                                 <table class="table table-bordered table-hover table-striped">
                                     <thead>
                                     <tr>
-                                        <th>Id</th>
-                                        <th>User Id</th>
-                                        <th>Name</th>
-                                        <th>Product Id</th>
-                                        <th>Quantity</th>
-                                        <th>Order Place</th>
-                                        <th>Mobile</th>
-                                        <th>Order Date</th>
-                                        <th>Delivery Date</th>
+                                        <th>N°</th>
+
+                                        <th>Nom</th>
+                                        <th>Quantité</th>
+                                        <th>Telephone</th>
+                                        <th>Date commande</th>
+                                        <th>Date Livraison</th>
+                                        <th>Statut</th>
+                                        <th>Action</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     {% for product in result %}
                                     <tr>
                                         <td>{{product.id}}</td>
-                                        <td>{{product.uid}}</td>
+
                                         <td>{{product.ofname}}</td>
-                                        <td>{{product.pid}}</td>
                                         <td>{{product.quantity}}</td>
-                                        <td>{{product.oplace}}</td>
                                         <td>{{product.mobile}}</td>
                                         <td>{{product.odate}}</td>
                                         <td>{{product.ddate}}</td>
+                                        <td>
+                                        {% if product.dstatus == 'no' %}
+                                            <span class="badge badge-warning">Non gérée</span>
+                                        {% else %}
+                                            <span class="badge badge-success">Gérée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if product.dstatus == 'no' %}
+                                        <a href="{{ url_for('manage_order', order_id=product.id) }}" class="btn btn-sm btn-primary">
+                                            Gérer
+                                        </a>
+                                        {% else %}
+                                        <button class="btn btn-sm btn-secondary" disabled>Déjà gérée</button>
+                                        {% endif %}
+                                    </td>
                                     </tr>
+
                                     {% endfor%}
                                     </tbody>
                                 </table>

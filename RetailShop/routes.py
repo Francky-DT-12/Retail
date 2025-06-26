@@ -505,24 +505,44 @@ def admin_profile():
             cur.close()
 
 
-@app.route('/update_admin_profile', methods=['POST'])
+@app.route('/update_admin_profile', methods=['GET', 'POST'])
 @is_admin_logged_in
 def update_admin_profile():
+    if request.method == 'GET':
+        # Afficher le formulaire avec les données actuelles
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cur.execute("SELECT * FROM admin WHERE id = %s", [session['admin_id']])
+        admin = cur.fetchone()
+        cur.close()
+        return render_template('pages/edit_admin_profile.html', admin=admin)
+
     if request.method == 'POST':
+        # Traitement de la soumission du formulaire
         try:
-            # Récupère les données du formulaire
+            # Récupérer les données du formulaire
             firstName = request.form['firstName']
             lastName = request.form['lastName']
             email = request.form['email']
             mobile = request.form.get('mobile', '')
             address = request.form.get('address', '')
+            current_password = request.form['current_password']
 
-            # Validation simple
-            if not firstName or not lastName or not email:
-                flash('Required fields are missing', 'danger')
-                return redirect(url_for('admin_profile'))
+            # Valider les champs obligatoires
+            if not all([firstName, lastName, email, current_password]):
+                flash('Tous les champs obligatoires doivent être remplis', 'danger')
+                return redirect(url_for('update_admin_profile'))
 
-            cur = mysql.connection.cursor()
+            # Vérifier le mot de passe actuel
+            cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+            cur.execute("SELECT password FROM admin WHERE id = %s", [session['admin_id']])
+            admin = cur.fetchone()
+
+            hashed_password = hashlib.sha256(current_password.encode()).hexdigest()
+            if hashed_password != admin['password']:
+                flash('Mot de passe actuel incorrect', 'danger')
+                return redirect(url_for('update_admin_profile'))
+
+            # Mettre à jour le profil
             cur.execute("""
                 UPDATE admin SET
                 firstName = %s,
@@ -534,27 +554,64 @@ def update_admin_profile():
             """, (firstName, lastName, email, mobile, address, session['admin_id']))
 
             mysql.connection.commit()
-            flash('Profile updated successfully', 'success')
+            flash('Profil mis à jour avec succès', 'success')
+
+            # Mettre à jour le nom dans la session si modifié
+            session['admin_name'] = firstName
 
         except Exception as e:
             mysql.connection.rollback()
-            flash(f'Error updating profile: {str(e)}', 'danger')
-
+            flash(f'Une erreur est survenue: {str(e)}', 'danger')
         finally:
             cur.close()
 
-    return redirect(url_for('admin_profile'))
+        return redirect(url_for('admin_profile'))
 
 @app.route('/orders')
 @is_admin_logged_in
 def orders():
     curso = mysql.connection.cursor()
-    num_rows = curso.execute("SELECT * FROM products")
+    num_rows = curso.execute("SELECT * FROM products ")
     order_rows = curso.execute("SELECT * FROM orders")
     result = curso.fetchall()
     users_rows = curso.execute("SELECT * FROM users")
     return render_template('pages/all_orders.html', result=result, row=num_rows, order_rows=order_rows,
                            users_rows=users_rows)
+
+@app.route('/order/<int:order_id>/manage', methods=['GET', 'POST'])
+def manage_order(order_id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("""
+                SELECT o.*,
+                       u.name as user_name,
+                       u.email as user_email,
+                       p.pName as product_name,  
+                       p.price as product_price
+                FROM orders o
+                LEFT JOIN users u ON o.uid = u.id  
+                JOIN products p ON o.pid = p.id   
+                WHERE o.id = %s
+            """, (order_id,))
+    order = cursor.fetchone()
+
+    if not order:
+        flash("Commande introuvable.", "danger")
+        return redirect(url_for('orders'))
+
+    if request.method == 'POST':
+        action = request.form.get("action")
+        if action == "complete":
+            cursor.execute("UPDATE orders SET dstatus = %s WHERE id = %s", ('Traité', order_id))
+            mysql.connection.commit()
+            flash('Commande marquée comme traitée.', 'success')
+        elif action == "cancel":
+            cursor.execute("DELETE FROM orders WHERE id = %s", (order_id,))
+            mysql.connection.commit()
+            flash('Commande annulée.', 'warning')
+        return redirect(url_for('orders'))
+
+    return render_template('pages/manage_order.html', order=order)
+
 
 
 @app.route('/users')
