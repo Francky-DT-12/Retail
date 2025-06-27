@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, session
-from flask_mysqldb import MySQL
+from flask_pymysql import MySQL
 from functools import wraps
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import os
@@ -24,19 +24,33 @@ mysql = MySQL()
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'webapp'
 app.config['MYSQL_PASSWORD'] = 'motdepassefort'
-app.config['MYSQL_DB'] = 'shoptubedb'
+app.config['MYSQL_DB'] = 'shoptub'  # Changed from 'shoptubedb' to 'shoptub'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
+# Initialize MySQL
+mysql.init_app(app)
+
+# Test connection
 try:
-    mysql.init_app(app)
-    # Test connection
     with app.app_context():
-        mysql.connection.cursor().close()
-    print("MySQL connection successful!")
+        conn = mysql.connection
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT DATABASE();")
+            db_name = cursor.fetchone()['DATABASE()']
+            print(f"Successfully connected to database: {db_name}")
+            cursor.close()
+        else:
+            print("MySQL connection failed: connection object is None")
+            print("This could be due to:")
+            print("1. MySQL server is not running")
+            print("2. Database 'shoptub' does not exist")
+            print("3. User 'webapp' does not have access to the database")
+            print("4. Password is incorrect")
 except Exception as e:
     print(f"Error connecting to MySQL: {e}")
     print("Please check if MySQL server is running and the credentials are correct.")
-    print("Database: shoptubedb, User: webapp, Password: motdepassefort")
+    print("Database: shoptub, User: webapp, Password: motdepassefort")
 
 
 def is_logged_in(f):

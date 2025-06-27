@@ -1,6 +1,6 @@
 from flask import Flask
-from flask_mysqldb import MySQL
-import MySQLdb.cursors
+from flask_pymysql import MySQL
+import pymysql.cursors
 
 app = Flask(__name__)
 
@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'webapp'
 app.config['MYSQL_PASSWORD'] = 'motdepassefort'
-app.config['MYSQL_DB'] = 'shoptubedb'
+app.config['MYSQL_DB'] = 'shoptub'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 # Initialize MySQL

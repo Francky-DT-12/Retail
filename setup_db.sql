@@ -1,13 +1,13 @@
 -- Create the database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS shoptubedb;
+CREATE DATABASE IF NOT EXISTS shoptub;
 
 -- Create the user if it doesn't exist and grant privileges
 CREATE USER IF NOT EXISTS 'webapp'@'localhost' IDENTIFIED BY 'motdepassefort';
-GRANT ALL PRIVILEGES ON shoptubedb.* TO 'webapp'@'localhost';
+GRANT ALL PRIVILEGES ON shoptub.* TO 'webapp'@'localhost';
 FLUSH PRIVILEGES;
 
 -- Use the database
-USE shoptubedb;
+USE shoptub;
 
 -- Create tables
 CREATE TABLE IF NOT EXISTS `admin` (
