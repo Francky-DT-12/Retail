@@ -3,12 +3,12 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header">Dashboard</h1>
+            <h1 class="page-header">Gestion des Commandes</h1>
             {% include 'includes/_flashmsg.html' %}
         </div>
-        <!-- /.col-lg-12 -->
     </div>
-    <!-- /.row -->
+
+    <!-- Cartes de statistiques -->
     <div class="row">
         <div class="col-lg-4 col-md-6">
             <div class="panel panel-primary">
@@ -19,41 +19,43 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{row}}</div>
-                            <div>All Product</div>
+                            <div>Produits</div>
                         </div>
                     </div>
                 </div>
-                <a href="/admin">
+                <a href="/admin_add_product">
                     <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
+                        <span class="pull-left">Ajouter Produit</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                         <div class="clearfix"></div>
                     </div>
                 </a>
             </div>
         </div>
+
         <div class="col-lg-4 col-md-6">
             <div class="panel panel-green">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
-                            <i class="fa fa-tasks fa-5x"></i>
+                            <i class="fa fa-users fa-5x"></i>
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{users_rows}}</div>
-                            <div>All Users</div>
+                            <div>Utilisateurs</div>
                         </div>
                     </div>
                 </div>
                 <a href="/users">
                     <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
+                        <span class="pull-left">Voir Liste</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                         <div class="clearfix"></div>
                     </div>
                 </a>
             </div>
         </div>
+
         <div class="col-lg-4 col-md-6">
             <div class="panel panel-yellow">
                 <div class="panel-heading">
@@ -63,13 +65,13 @@
                         </div>
                         <div class="col-xs-9 text-right">
                             <div class="huge">{{order_rows}}</div>
-                            <div>All Orders</div>
+                            <div>Commandes</div>
                         </div>
                     </div>
                 </div>
                 <a href="/orders">
                     <div class="panel-footer">
-                        <span class="pull-left">View Details</span>
+                        <span class="pull-left">Voir Toutes</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                         <div class="clearfix"></div>
                     </div>
@@ -77,77 +79,172 @@
             </div>
         </div>
     </div>
-    <!-- /.row -->
+
+    <!-- Tableau des commandes -->
     <div class="row">
         <div class="col-lg-12">
-            <div class="panel panel-default my-4">
+            <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i>All Orders
+                    <i class="fa fa-list"></i> Liste des Commandes ({{pagination.total}})
                 </div>
-                <!-- /.panel-heading -->
                 <div class="panel-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            {% if result %}
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover table-striped">
-                                    <thead>
-                                    <tr>
-                                        <th>N°</th>
-
-                                        <th>Nom</th>
-                                        <th>Quantité</th>
-                                        <th>Telephone</th>
-                                        <th>Date commande</th>
-                                        <th>Date Livraison</th>
-                                        <th>Statut</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for product in result %}
-                                    <tr>
-                                        <td>{{product.id}}</td>
-
-                                        <td>{{product.ofname}}</td>
-                                        <td>{{product.quantity}}</td>
-                                        <td>{{product.mobile}}</td>
-                                        <td>{{product.odate}}</td>
-                                        <td>{{product.ddate}}</td>
-                                        <td>
-                                        {% if product.dstatus == 'no' %}
-                                            <span class="badge badge-warning">Non gérée</span>
+                    {% if result %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>N°</th>
+                                    <th>Produit</th>
+                                    <th>Client</th>
+                                    <th>Quantité</th>
+                                    <th>Téléphone</th>
+                                    <th>Date commande</th>
+                                    <th>Date Livraison</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in result %}
+                                <tr>
+                                    <td>{{order.id}}</td>
+                                    <td>{{order.pName or 'N/A'}}</td>
+                                    <td>{{order.ofname}}</td>
+                                    <td>{{order.quantity}}</td>
+                                    <td>{{order.mobile}}</td>
+                                    <td>{{order.odate.strftime('%d/%m/%Y %H:%M') if order.odate else 'N/A'}}</td>
+                                    <td>{{order.ddate.strftime('%d/%m/%Y') if order.ddate else 'À définir'}}</td>
+                                    <td>
+                                        {% if order.dstatus == 'no' %}
+                                            <span class="label label-warning">En attente</span>
                                         {% else %}
-                                            <span class="badge badge-success">Gérée</span>
+                                            <span class="label label-success">Traité</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if product.dstatus == 'no' %}
-                                        <a href="{{ url_for('manage_order', order_id=product.id) }}" class="btn btn-sm btn-primary">
-                                            Gérer
+                                        <a href="{{ url_for('manage_order', order_id=order.id) }}" class="btn btn-xs btn-primary">
+                                            <i class="fa fa-edit"></i> Gérer
                                         </a>
-                                        {% else %}
-                                        <button class="btn btn-sm btn-secondary" disabled>Déjà gérée</button>
-                                        {% endif %}
+                                        <a href="{{ url_for('orders', order_id=order.id) }}" class="btn btn-xs btn-info">
+                                            <i class="fa fa-eye"></i> Détails
+                                        </a>
                                     </td>
-                                    </tr>
-
-                                    {% endfor%}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
-                            <h3>No orders found</h3>
-                            {% endif %}
-                            <!-- /.table-responsive -->
-                        </div>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <!-- /.row -->
+
+                    <!-- Pagination -->
+                    <div class="text-center">
+                        <ul class="pagination">
+                            <!-- Première page & Précédent -->
+                            {% if pagination.page > 1 %}
+                                <li><a href="?page=1">&laquo; Première</a></li>
+                                <li><a href="?page={{ pagination.page - 1 }}">Précédent</a></li>
+                            {% else %}
+                                <li class="disabled"><span>&laquo; Première</span></li>
+                                <li class="disabled"><span>Précédent</span></li>
+                            {% endif %}
+
+                            <!-- Pages autour de la page courante -->
+                            {% set start_page = (pagination.page - 2) if (pagination.page - 2) > 0 else 1 %}
+                            {% set end_page = (start_page + 4) if (start_page + 4) <= pagination.total_pages else pagination.total_pages %}
+
+                            {% if start_page > 1 %}
+                                <li class="disabled"><span>...</span></li>
+                            {% endif %}
+
+                            {% for p in range(start_page, end_page + 1) %}
+                                {% if p == pagination.page %}
+                                    <li class="active"><span>{{ p }}</span></li>
+                                {% else %}
+                                    <li><a href="?page={{ p }}">{{ p }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if end_page < pagination.total_pages %}
+                                <li class="disabled"><span>...</span></li>
+                            {% endif %}
+
+                            <!-- Suivant & Dernière page -->
+                            {% if pagination.page < pagination.total_pages %}
+                                <li><a href="?page={{ pagination.page + 1 }}">Suivant</a></li>
+                                <li><a href="?page={{ pagination.total_pages }}">Dernière &raquo;</a></li>
+                            {% else %}
+                                <li class="disabled"><span>Suivant</span></li>
+                                <li class="disabled"><span>Dernière &raquo;</span></li>
+                            {% endif %}
+                        </ul>
+                        <p class="text-muted">
+                            Affichage de {{ ((pagination.page - 1) * pagination.per_page) + 1 }} à
+                            {{ [pagination.page * pagination.per_page, pagination.total]|min }}
+                            sur {{ pagination.total }} commandes
+                        </p>
+                    </div>
+                    {% else %}
+                        <div class="alert alert-info">Aucune commande trouvée</div>
+                    {% endif %}
                 </div>
-                <!-- /.panel-body -->
             </div>
         </div>
     </div>
-    <!-- /.row -->
 </div>
+
+/* Styles pour la pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+    margin: 0 5px;
+    border-radius: 3px;
+}
+
+.pagination > .active > span {
+    background-color: #337ab7;
+    border-color: #337ab7;
+}
+
+/* Styles pour les états des commandes */
+.label-warning {
+    background-color: #f0ad4e;
+}
+
+.label-success {
+    background-color: #5cb85c;
+}
+
+.label {
+    display: inline;
+    padding: 0.2em 0.6em;
+    font-size: 90%;
+    font-weight: bold;
+    line-height: 1;
+    color: white;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25em;
+}
+
+/* Responsive table */
+.table-responsive {
+    overflow-x: auto;
+    min-height: 0.01%;
+}
+
+@media screen and (max-width: 767px) {
+    .table-responsive {
+        width: 100%;
+        margin-bottom: 15px;
+        overflow-y: hidden;
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+        border: 1px solid #ddd;
+    }
+}
+
 {% endblock %}

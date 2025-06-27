@@ -4,14 +4,14 @@
 <div class="profile-container">
     <div class="profile-card">
         <div class="profile-header">
-            <img src="{{ url_for('static', filename='image/admin/admin_avatar.png') }}"
+            <img src="{{ url_for('static', filename='image/admin/' ~ admin.image_profile) }}"
                  class="profile-avatar"
                  alt="Avatar administrateur">
         </div>
 
         <h3 class="profile-name">{{ admin.firstName }} {{ admin.lastName }}</h3>
         <p class="profile-title">
-            <i class="fa fa-user profile-icon"></i>Administrateur Système
+            <i class="fa fa-user profile-icon"></i> Administrateur Système
         </p>
 
         <div class="profile-info">
@@ -40,10 +40,10 @@
 </div>
 
 <style>
-  a{
-  text-decoration:none;
-  }
-    /* Conteneur principal */
+    a {
+        text-decoration: none;
+    }
+
     .profile-container {
         display: flex;
         justify-content: center;
@@ -52,7 +52,6 @@
         padding: 20px;
     }
 
-    /* Carte de profil */
     .profile-card {
         width: 100%;
         max-width: 500px;
@@ -69,7 +68,6 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
-    /* Avatar */
     .profile-avatar {
         width: 150px;
         height: 150px;
@@ -85,7 +83,6 @@
         box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
     }
 
-    /* Texte */
     .profile-name {
         color: #2e3a4e;
         font-size: 1.8rem;
@@ -104,7 +101,6 @@
         margin-right: 8px;
     }
 
-    /* Informations */
     .profile-info {
         margin-bottom: 30px;
         text-align: left;
@@ -134,14 +130,12 @@
         margin-right: 15px;
     }
 
-    /* Bouton */
     .edit-button {
         display: inline-block;
-        background-color: Orange;
+        background-color: orange;
         color: white;
         padding: 12px 25px;
         border-radius: 50px;
-        text-decoration: none;
         font-weight: 500;
         transition: all 0.3s ease;
         box-shadow: 0 2px 5px rgba(78, 115, 223, 0.3);
@@ -153,9 +147,11 @@
         box-shadow: 0 4px 8px rgba(78, 115, 223, 0.3);
         color: white;
     }
-    .fa-user-edit{
-    color: white;
+
+    .fa-user-edit {
+        color: white;
     }
+
     .edit-button i {
         margin-right: 8px;
     }

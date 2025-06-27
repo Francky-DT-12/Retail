@@ -1,13 +1,19 @@
+import builtins
+import os
+import traceback
+
 import MySQLdb
-from flask import render_template, flash, redirect, url_for, session, request, logging
+from flask import render_template, flash, redirect, url_for, session, request, logging, current_app
 from passlib.hash import sha256_crypt
 import timeit
 import datetime
+from werkzeug.utils import secure_filename
+import hashlib
 from RetailShop import mysql
 from RetailShop.form import OrderForm, LoginForm, UpdateRegisterForm, DeveloperForm, MessageForm, RegisterForm
 from RetailShop import app, not_logged_in, is_logged_in, content_based_filtering, wrappers, photos, is_admin_logged_in, \
     not_admin_logged_in
-
+from math import ceil
 
 @app.route('/')
 def index():
@@ -421,8 +427,51 @@ def shoes():
     return render_template('shoes.html', shoes=products, form=form)
 
 
-import hashlib # You'll need to import hashlib
 
+
+PER_PAGE = 10
+@app.route('/admin')
+@is_admin_logged_in
+def admin():
+
+    page = request.args.get('page', 1, type=int)
+    offset = (page - 1) * PER_PAGE
+
+    # Connexion à la base de données
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    try:
+        # Produits (avec pagination)
+        # Compte total
+        cur.execute("SELECT COUNT(*) as total FROM products")
+        total_products = cur.fetchone()['total']
+        total_pages = ceil(total_products / PER_PAGE)
+
+        # Données paginées
+        cur.execute("SELECT * FROM products ORDER BY id DESC LIMIT %s OFFSET %s", (PER_PAGE, offset))
+        products = cur.fetchall()
+
+        # Autres statistiques (sans pagination)
+        cur.execute("SELECT COUNT(*) as total FROM users")
+        total_users = cur.fetchone()['total']
+
+        cur.execute("SELECT COUNT(*) as total FROM orders")
+        total_orders = cur.fetchone()['total']
+
+        return render_template('pages/index.html',
+                               result=products,
+                               row=total_products,
+                               users_rows=total_users,
+                               order_rows=total_orders,
+                               pagination={
+                                   'page': page,
+                                   'per_page': PER_PAGE,
+                                   'total': total_products,
+                                   'total_pages': total_pages
+                               }, max=builtins.max,
+                                 min=builtins.min)
+    finally:
+        cur.close()
 
 @app.route('/admin_login', methods=['GET', 'POST'])
 @not_admin_logged_in
@@ -467,18 +516,6 @@ def admin_logout():
     return redirect(url_for('admin'))
 
 
-@app.route('/admin')
-@is_admin_logged_in
-def admin():
-    curso = mysql.connection.cursor()
-    num_rows = curso.execute("SELECT * FROM products")
-    result = curso.fetchall()
-    order_rows = curso.execute("SELECT * FROM orders")
-    users_rows = curso.execute("SELECT * FROM users")
-    return render_template('pages/index.html', result=result, row=num_rows, order_rows=order_rows,
-                           users_rows=users_rows)
-
-
 @app.route('/admin_profile')
 @is_admin_logged_in
 def admin_profile():
@@ -504,79 +541,185 @@ def admin_profile():
         if 'cur' in locals():
             cur.close()
 
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
+UPLOAD_FOLDER = os.path.join('static', 'images', 'admin')  # Changé 'image' en 'images'
+MAX_FILE_SIZE = 16 * 1024 * 1024
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/update_admin_profile', methods=['GET', 'POST'])
 @is_admin_logged_in
 def update_admin_profile():
+    # Define UPLOAD_FOLDER dynamically within the route using current_app.root_path
+    # This ensures the path is always absolute relative to your application's root directory.
+    UPLOAD_FOLDER_ABSOLUTE = os.path.join(current_app.root_path, 'static', 'image', 'admin')
+
     if request.method == 'GET':
-        # Afficher le formulaire avec les données actuelles
+        # ... (your GET logic remains the same)
         cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cur.execute("SELECT * FROM admin WHERE id = %s", [session['admin_id']])
-        admin = cur.fetchone()
-        cur.close()
+        try:
+            cur.execute("SELECT * FROM admin WHERE id = %s", [session['admin_id']])
+            admin = cur.fetchone()
+        except Exception as e:
+            flash(f"Erreur lors de la récupération du profil: {str(e)}", "danger")
+            admin = None
+        finally:
+            cur.close()
+
+        if not admin:
+            flash("Profil administrateur introuvable.", "danger")
+            return redirect(url_for('admin_dashboard'))
+
         return render_template('pages/edit_admin_profile.html', admin=admin)
 
     if request.method == 'POST':
-        # Traitement de la soumission du formulaire
+        cur = None
         try:
-            # Récupérer les données du formulaire
             firstName = request.form['firstName']
             lastName = request.form['lastName']
             email = request.form['email']
             mobile = request.form.get('mobile', '')
             address = request.form.get('address', '')
             current_password = request.form['current_password']
+            image_file = request.files.get('image')
 
-            # Valider les champs obligatoires
             if not all([firstName, lastName, email, current_password]):
-                flash('Tous les champs obligatoires doivent être remplis', 'danger')
+                flash('Tous les champs obligatoires doivent être remplis.', 'danger')
                 return redirect(url_for('update_admin_profile'))
 
-            # Vérifier le mot de passe actuel
             cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            cur.execute("SELECT password FROM admin WHERE id = %s", [session['admin_id']])
-            admin = cur.fetchone()
+            # Fetch only password and image_profile to avoid issues if other columns are missing during initial setup
+            cur.execute("SELECT password, image_profile FROM admin WHERE id = %s", [session['admin_id']])
+            admin_data = cur.fetchone()
 
-            hashed_password = hashlib.sha256(current_password.encode()).hexdigest()
-            if hashed_password != admin['password']:
-                flash('Mot de passe actuel incorrect', 'danger')
+            if not admin_data:
+                flash('Administrateur introuvable ou non connecté.', 'danger')
                 return redirect(url_for('update_admin_profile'))
 
-            # Mettre à jour le profil
+            # Vérification du mot de passe (adaptez selon votre méthode de hachage)
+            hashed_password = hashlib.sha256(current_password.encode()).hexdigest()
+            if hashed_password != admin_data['password']: # Using admin_data here
+                flash('Mot de passe actuel incorrect.', 'danger')
+                return redirect(url_for('update_admin_profile'))
+
+            image_profile = admin_data.get('image_profile') # Use .get() for safety
+
+            if image_file and image_file.filename != '':
+                if not allowed_file(image_file.filename):
+                    flash("Format de fichier non autorisé. Formats acceptés : jpg, jpeg, png, gif.", "danger")
+                    return redirect(url_for('update_admin_profile'))
+
+                file_ext = os.path.splitext(image_file.filename)[1].lower()
+                new_filename = f"admin_{session['admin_id']}{file_ext}"
+
+                # Use the absolute path defined above
+                os.makedirs(UPLOAD_FOLDER_ABSOLUTE, exist_ok=True)
+                upload_path = os.path.join(UPLOAD_FOLDER_ABSOLUTE, new_filename)
+
+                # --- Debugging Print Statements ---
+                print(f"DEBUG: Tentative d'enregistrement de l'image.")
+                print(f"DEBUG: Fichier: {image_file.filename}")
+                print(f"DEBUG: Chemin absolu du dossier: {UPLOAD_FOLDER_ABSOLUTE}")
+                print(f"DEBUG: Chemin complet de sauvegarde: {upload_path}")
+                # --- End Debugging Print Statements ---
+
+                try:
+                    image_file.save(upload_path)
+                    print(f"DEBUG: Image enregistrée avec succès: {upload_path}")
+
+                    # Delete old image if it's not the default one and different from new
+                    if image_profile and image_profile != 'default_admin.png' and image_profile != new_filename:
+                        old_image_path = os.path.join(UPLOAD_FOLDER_ABSOLUTE, image_profile)
+                        if os.path.exists(old_image_path):
+                            try:
+                                os.remove(old_image_path)
+                                print(f"DEBUG: Ancienne image supprimée: {old_image_path}")
+                            except OSError as remove_err: # Catch specific OSError for file ops
+                                print(f"WARNING: Impossible de supprimer l'ancienne image {old_image_path}: {remove_err}")
+
+                    image_profile = new_filename # Update the filename to store in DB
+
+                except Exception as save_error:
+                    print(f"ERREUR CRITIQUE: Erreur lors de l'enregistrement du fichier: {save_error}")
+                    print(f"TRACEBACK: {traceback.format_exc()}")
+                    flash(f"Impossible d'enregistrer l'image. Vérifiez les permissions du dossier: {str(save_error)}", "danger")
+                    return redirect(url_for('update_admin_profile'))
+            else:
+                print("DEBUG: Pas de fichier image soumis ou fichier vide.")
+
+
+            # Mise à jour en base de données
             cur.execute("""
                 UPDATE admin SET
-                firstName = %s,
-                lastName = %s,
-                email = %s,
-                mobile = %s,
-                address = %s
+                    firstName = %s,
+                    lastName = %s,
+                    email = %s,
+                    mobile = %s,
+                    address = %s,
+                    image_profile = %s
                 WHERE id = %s
-            """, (firstName, lastName, email, mobile, address, session['admin_id']))
+            """, (firstName, lastName, email, mobile, address, image_profile, session['admin_id']))
 
             mysql.connection.commit()
-            flash('Profil mis à jour avec succès', 'success')
 
-            # Mettre à jour le nom dans la session si modifié
             session['admin_name'] = firstName
+            session['admin_image'] = image_profile
+
+            flash('Profil mis à jour avec succès.', 'success')
 
         except Exception as e:
-            mysql.connection.rollback()
-            flash(f'Une erreur est survenue: {str(e)}', 'danger')
+            if cur:
+                mysql.connection.rollback()
+            flash(f'Une erreur est survenue lors de la mise à jour du profil : {str(e)}', 'danger')
+            print(f"Erreur générale de mise à jour: {traceback.format_exc()}")
         finally:
-            cur.close()
+            if cur:
+                cur.close()
 
         return redirect(url_for('admin_profile'))
 
+
+PER_PAGE = 10  # Nombre de commandes par page
 @app.route('/orders')
 @is_admin_logged_in
 def orders():
-    curso = mysql.connection.cursor()
-    num_rows = curso.execute("SELECT * FROM products ")
-    order_rows = curso.execute("SELECT * FROM orders")
-    result = curso.fetchall()
-    users_rows = curso.execute("SELECT * FROM users")
-    return render_template('pages/all_orders.html', result=result, row=num_rows, order_rows=order_rows,
-                           users_rows=users_rows)
+    # Pagination
+    page = request.args.get('page', 1, type=int)
+    offset = (page - 1) * PER_PAGE
+
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    try:
+        # Comptage total des commandes
+        cur.execute("SELECT COUNT(*) as total FROM orders")
+        total_orders = cur.fetchone()['total']
+        total_pages = ceil(total_orders / PER_PAGE)
+
+        # Commandes paginées
+        cur.execute("SELECT * FROM orders ORDER BY odate DESC LIMIT %s OFFSET %s", (PER_PAGE, offset))
+        orders = cur.fetchall()
+
+        # Autres statistiques (optionnel)
+        cur.execute("SELECT COUNT(*) as total FROM products")
+        num_rows = cur.fetchone()['total']
+
+        cur.execute("SELECT COUNT(*) as total FROM users")
+        users_rows = cur.fetchone()['total']
+
+        return render_template('pages/all_orders.html',
+                               result=orders,
+                               row=num_rows,
+                               order_rows=total_orders,
+                               users_rows=users_rows,
+                               pagination={
+                                   'page': page,
+                                   'per_page': PER_PAGE,
+                                   'total': total_orders,
+                                   'total_pages': total_pages
+                               })
+    finally:
+        cur.close()
 
 @app.route('/order/<int:order_id>/manage', methods=['GET', 'POST'])
 def manage_order(order_id):
@@ -961,3 +1104,60 @@ def developer():
     else:
         return render_template('developer.html', form=form)
 
+
+@app.route('/admin_search', methods=['GET'])
+@is_admin_logged_in  # Assurez-vous que seul l'admin peut accéder
+def admin_search():
+    search_term = request.args.get('q', '').strip()
+
+    if not search_term:
+        flash('Veuillez entrer un terme de recherche', 'warning')
+        return redirect(url_for('admin'))  # Retour au dashboard admin
+
+    try:
+        cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+        # Recherche dans les produits (nom, description, catégorie, code)
+        query = """
+            SELECT id, pName as name, price, category, available, pCode as code 
+            FROM products 
+            WHERE pName LIKE %s 
+               OR description LIKE %s 
+               OR category LIKE %s
+               OR pCode LIKE %s
+            ORDER BY id DESC
+            LIMIT 20
+        """
+        search_pattern = f"%{search_term}%"
+        cur.execute(query, (search_pattern, search_pattern, search_pattern, search_pattern))
+        products = cur.fetchall()
+
+        # Recherche dans les utilisateurs si besoin
+        user_query = "SELECT id, name, email FROM users WHERE name LIKE %s OR email LIKE %s LIMIT 5"
+        cur.execute(user_query, (search_pattern, search_pattern))
+        users = cur.fetchall()
+
+        # Recherche dans les commandes si besoin
+        order_query = """
+            SELECT o.id, o.ofname as customer, o.oplace as address, o.dstatus as status, 
+                   p.pName as product_name 
+            FROM orders o
+            LEFT JOIN products p ON o.pid = p.id
+            WHERE o.ofname LIKE %s OR o.oplace LIKE %s OR p.pName LIKE %s
+            LIMIT 5
+        """
+        cur.execute(order_query, (search_pattern, search_pattern, search_pattern))
+        orders = cur.fetchall()
+
+        return render_template('pages/search_results.html',
+                               products=products,
+                               users=users,
+                               orders=orders,
+                               search_term=search_term)
+
+    except Exception as e:
+        flash(f'Erreur lors de la recherche: {str(e)}', 'danger')
+        return redirect(url_for('admin'))
+    finally:
+        if cur:
+            cur.close()
