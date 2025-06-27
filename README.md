@@ -97,6 +97,10 @@ If you encounter database connection issues, check the following:
    ```bash
    mysql -u root -p < setup_db.sql
    ```
+6. TO add test data, you can run the `test_data.sql` script:
+   ```bash
+   mysql -u webapp -p'motdepassefort' shoptub < more_data.sql
+   ```
 
 ## Key Features
 ### Public User

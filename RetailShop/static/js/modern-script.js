@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close header notification
     const closeBtn = document.querySelector('.close-btn');
     const headerTop = document.querySelector('.header-top');
-    
+
     if (closeBtn && headerTop) {
         closeBtn.addEventListener('click', function() {
             headerTop.style.display = 'none';
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.addEventListener('focus', function() {
             this.parentElement.style.boxShadow = '0 0 0 2px rgba(0,0,0,0.1)';
         });
-        
+
         searchInput.addEventListener('blur', function() {
             this.parentElement.style.boxShadow = 'none';
         });
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.addEventListener('mouseenter', function() {
             this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
         });
-        
+
         card.addEventListener('mouseleave', function() {
             this.style.boxShadow = 'none';
         });
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const targetId = this.getAttribute('href').substring(1);
                 const targetElement = document.getElementById(targetId);
-                
+
                 if (targetElement) {
                     targetElement.scrollIntoView({
                         behavior: 'smooth'
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         newsletterForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const email = this.querySelector('input[type="email"]').value;
-            
+
             if (email) {
                 // Here you would typically send the email to your server
                 alert('Thank you for subscribing to our newsletter!');
@@ -85,32 +85,80 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Dropdown menu functionality - Updated to work with Bootstrap
+    // Dropdown menu functionality - Improved implementation
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
-    
+
     dropdownToggles.forEach(toggle => {
         const dropdownMenu = toggle.nextElementSibling;
-        
+
         if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-            // For desktop - add hover functionality
             const dropdown = toggle.closest('.dropdown');
-            
-            if (dropdown && window.innerWidth > 767) {
-                dropdown.addEventListener('mouseenter', function() {
-                    if (!dropdownMenu.classList.contains('show')) {
-                        // Use Bootstrap's dropdown API
-                        $(toggle).dropdown('show');
+
+            // Click functionality for mobile and desktop
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Close other dropdowns
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    if (menu !== dropdownMenu) {
+                        menu.classList.remove('show');
                     }
                 });
-                
+
+                // Toggle current dropdown
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Prevent dropdown from closing when clicking inside it
+            dropdownMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            // Allow dropdown items to work normally (don't prevent their default behavior)
+            const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    // Allow the link to work normally, just close the dropdown
+                    dropdownMenu.classList.remove('show');
+                });
+            });
+
+            // Hover functionality for desktop
+            if (window.innerWidth > 767) {
+                dropdown.addEventListener('mouseenter', function() {
+                    dropdownMenu.classList.add('show');
+                });
+
                 dropdown.addEventListener('mouseleave', function() {
-                    if (dropdownMenu.classList.contains('show')) {
-                        // Use Bootstrap's dropdown API
-                        $(toggle).dropdown('hide');
-                    }
+                    dropdownMenu.classList.remove('show');
                 });
             }
         }
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+
+    // Handle window resize to update hover behavior
+    window.addEventListener('resize', function() {
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(dropdown => {
+            const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+            if (dropdownMenu) {
+                if (window.innerWidth <= 767) {
+                    // Remove hover events on mobile
+                    dropdown.removeEventListener('mouseenter', function() {});
+                    dropdown.removeEventListener('mouseleave', function() {});
+                }
+            }
+        });
     });
 
     // View all buttons
@@ -169,7 +217,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mobile menu toggle (if needed)
     const navMenu = document.querySelector('.nav-menu');
     const hamburger = document.querySelector('.hamburger');
-    
+
     if (hamburger && navMenu) {
         hamburger.addEventListener('click', function() {
             navMenu.classList.toggle('active');
@@ -223,19 +271,19 @@ style.textContent = `
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.1); }
     }
-    
+
     .fa-star, .fa-star-half-alt {
         transition: transform 0.2s ease;
     }
-    
+
     .product-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .style-card {
         transition: transform 0.3s ease;
     }
-    
+
     .nav-menu a:hover {
         color: #666;
         transition: color 0.3s ease;

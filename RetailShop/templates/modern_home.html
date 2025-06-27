@@ -27,14 +27,14 @@
 
                     <ul class="nav-menu">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Shop <i class="fas fa-chevron-down"></i></a>
-                            <ul class="dropdown-menu">
-                                <li><a href="/mens">Hommes</a></li>
-                                <li><a href="/womens">Femmes</a></li>
-                                <li><a href="/tshirt">T-shirts</a></li>
-                                <li><a href="/shoes">Chaussures</a></li>
-                                <li><a href="/belt">Ceintures</a></li>
-                            </ul>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Shop <i class="fas fa-chevron-down"></i></a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/mens">Hommes</a>
+                                <a class="dropdown-item" href="/womens">Femmes</a>
+                                <a class="dropdown-item" href="/tshirt">T-shirts</a>
+                                <a class="dropdown-item" href="/shoes">Chaussures</a>
+                                <a class="dropdown-item" href="/belt">Ceintures</a>
+                            </div>
                         </li>
                         <li><a href="/sales">On Sale</a></li>
                         <li><a href="/arrivals">New Arrivals</a></li>
@@ -51,12 +51,24 @@
                     </div>
 
                     <div class="nav-icons">
+                        {% if session.logged_in %}
                         <a href="/cart" class="icon-link">
                             <i class="fas fa-shopping-cart"></i>
                         </a>
-                        <a href="/profile" class="icon-link">
+                        <a href="/profile?user={{session.uid}}" class="icon-link">
                             <i class="fas fa-user"></i>
                         </a>
+                        <a href="/out" class="icon-link" title="Déconnexion">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                        {% else %}
+                        <a href="/register" class="icon-link" title="Inscription">
+                            <i class="fas fa-user-plus"></i>
+                        </a>
+                        <a href="/login" class="icon-link" title="Connexion">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -199,19 +211,67 @@
             <div class="style-grid">
                 <div class="style-card casual">
                     <h3>Casual</h3>
-                    <div class="style-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    <div class="style-products">
+                        {% if casual_products %}
+                            {% for product in casual_products %}
+                            <a href="/view_product/{{ product.id }}" class="style-product">
+                                <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" alt="{{ product.pName }}">
+                                <span class="product-name">{{ product.pName }}</span>
+                                <span class="product-price">{{ product.price }} €</span>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="style-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="style-card formal">
                     <h3>Formal</h3>
-                    <div class="style-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                    <div class="style-products">
+                        {% if formal_products %}
+                            {% for product in formal_products %}
+                            <a href="/view_product/{{ product.id }}" class="style-product">
+                                <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" alt="{{ product.pName }}">
+                                <span class="product-name">{{ product.pName }}</span>
+                                <span class="product-price">{{ product.price }} €</span>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="style-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="style-card party">
                     <h3>Party</h3>
-                    <div class="style-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                    <div class="style-products">
+                        {% if party_products %}
+                            {% for product in party_products %}
+                            <a href="/view_product/{{ product.id }}" class="style-product">
+                                <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" alt="{{ product.pName }}">
+                                <span class="product-name">{{ product.pName }}</span>
+                                <span class="product-price">{{ product.price }} €</span>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="style-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="style-card gym">
                     <h3>Gym</h3>
-                    <div class="style-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                    <div class="style-products">
+                        {% if gym_products %}
+                            {% for product in gym_products %}
+                            <a href="/view_product/{{ product.id }}" class="style-product">
+                                <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" alt="{{ product.pName }}">
+                                <span class="product-name">{{ product.pName }}</span>
+                                <span class="product-price">{{ product.price }} €</span>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <div class="style-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -347,6 +407,12 @@
         </div>
     </footer>
 
+    <!-- Bootstrap and jQuery for dropdown functionality -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+    <!-- Custom modern script -->
     <script src="{{ url_for('static', filename='js/modern-script.js') }}"></script>
 </body>
 </html>

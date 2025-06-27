@@ -7,6 +7,9 @@ import os
 
 app = Flask(__name__)
 
+# Add min function to Jinja2 environment
+app.jinja_env.globals.update(min=min)
+
 app.secret_key = os.urandom(24)
 
 app.config['UPLOADED_PHOTOS_DEST'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'image', 'product')
@@ -115,7 +118,7 @@ def content_based_filtering(product_id):
             return ''
 
         data_cat = product['category']  # get id category ex shirt
-        print('Showing result for Product Id: ' + product_id)
+        print('Showing result for Product Id: ' + str(product_id))
 
         # Get all products in the same category
         cat_products = execute_query("SELECT * FROM products WHERE category=%s", (data_cat,), fetchall=True)

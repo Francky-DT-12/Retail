@@ -21,14 +21,33 @@ def index():
         belt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('belt',), fetchall=True)
         shoes = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('shoes',), fetchall=True)
 
+        # Get products for style categories (BROWSE BY DRESS STYLE section)
+        casual_products = execute_query("SELECT * FROM products WHERE item='casual' OR category='tshirt' ORDER BY RAND() LIMIT 3", (), fetchall=True)
+        formal_products = execute_query("SELECT * FROM products WHERE item='formal' OR category='wallet' ORDER BY RAND() LIMIT 3", (), fetchall=True)
+        party_products = execute_query("SELECT * FROM products WHERE item='party' OR category='belt' ORDER BY RAND() LIMIT 3", (), fetchall=True)
+        gym_products = execute_query("SELECT * FROM products WHERE item='gym' OR category='shoes' ORDER BY RAND() LIMIT 3", (), fetchall=True)
+
         if tshirt is None or wallet is None or belt is None or shoes is None:
             flash('Database error. Please check your database configuration.', 'danger')
-            return render_template('modern_home.html', tshirt=[], wallet=[], belt=[], shoes=[], form=form, db_error=True)
+            return render_template('modern_home.html', tshirt=[], wallet=[], belt=[], shoes=[], 
+                                 casual_products=[], formal_products=[], party_products=[], gym_products=[],
+                                 form=form, db_error=True)
 
-        return render_template('modern_home.html', tshirt=tshirt, wallet=wallet, belt=belt, shoes=shoes, form=form, db_error=False)
+        # Handle None values for style products
+        casual_products = casual_products or []
+        formal_products = formal_products or []
+        party_products = party_products or []
+        gym_products = gym_products or []
+
+        return render_template('modern_home.html', tshirt=tshirt, wallet=wallet, belt=belt, shoes=shoes, 
+                             casual_products=casual_products, formal_products=formal_products, 
+                             party_products=party_products, gym_products=gym_products,
+                             form=form, db_error=False)
     except Exception as e:
         flash(f'Database error: {str(e)}', 'danger')
-        return render_template('modern_home.html', tshirt=[], wallet=[], belt=[], shoes=[], form=form, db_error=True)
+        return render_template('modern_home.html', tshirt=[], wallet=[], belt=[], shoes=[], 
+                             casual_products=[], formal_products=[], party_products=[], gym_products=[],
+                             form=form, db_error=True)
 
 
 # User Login
@@ -368,7 +387,7 @@ def admin_login():
 
         try:
             # Get user by username
-            data = execute_query("SELECT * FROM admin WHERE email=?", [username], fetchone=True)
+            data = execute_query("SELECT * FROM admin WHERE email=%s", [username], fetchone=True)
 
             if data:
                 # Get stored value
@@ -464,37 +483,37 @@ def admin_add_product():
                 if save_photo:
                     # Insert product into database
                     product_id = execute_query("INSERT INTO products(pName,price,description,available,category,item,pCode,picture)"
-                                 "VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                                 "VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
                                  (name, price, description, available, category, item, code, picture), commit=True)
 
-                    execute_query("INSERT INTO product_level(product_id) VALUES(?)", [product_id], commit=True)
+                    execute_query("INSERT INTO product_level(product_id) VALUES(%s)", [product_id], commit=True)
 
                     if category == 'tshirt':
                         level = request.form.getlist('tshirt')
                         for lev in level:
                             yes = 'yes'
-                            query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                            query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                             execute_query(query, (yes, product_id), commit=True)
 
                     elif category == 'wallet':
                         level = request.form.getlist('wallet')
                         for lev in level:
                             yes = 'yes'
-                            query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                            query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                             execute_query(query, (yes, product_id), commit=True)
 
                     elif category == 'belt':
                         level = request.form.getlist('belt')
                         for lev in level:
                             yes = 'yes'
-                            query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                            query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                             execute_query(query, (yes, product_id), commit=True)
 
                     elif category == 'shoes':
                         level = request.form.getlist('shoes')
                         for lev in level:
                             yes = 'yes'
-                            query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                            query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                             execute_query(query, (yes, product_id), commit=True)
 
                     else:
@@ -521,8 +540,8 @@ def admin_add_product():
 def edit_product():
     if 'id' in request.args:
         product_id = request.args['id']
-        product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchall=True)
-        product_level = execute_query("SELECT * FROM product_level WHERE product_id=?", (product_id,), fetchall=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchall=True)
+        product_level = execute_query("SELECT * FROM product_level WHERE product_id=%s", (product_id,), fetchall=True)
 
         if product:
             if request.method == 'POST':
@@ -545,7 +564,7 @@ def edit_product():
                         if save_photo:
                             # Update product in database
                             exe = execute_query(
-                                "UPDATE products SET pName=?, price=?, description=?, available=?, category=?, item=?, pCode=?, picture=? WHERE id=?",
+                                "UPDATE products SET pName=%s, price=%s, description=%s, available=%s, category=%s, item=%s, pCode=%s, picture=%s WHERE id=%s",
                                 (name, price, description, available, category, item, code, picture, product_id), commit=True)
 
                             if exe is not None:
@@ -553,28 +572,28 @@ def edit_product():
                                     level = request.form.getlist('tshirt')
                                     for lev in level:
                                         yes = 'yes'
-                                        query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                                        query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                                         execute_query(query, (yes, product_id), commit=True)
 
                                 elif category == 'wallet':
                                     level = request.form.getlist('wallet')
                                     for lev in level:
                                         yes = 'yes'
-                                        query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                                        query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                                         execute_query(query, (yes, product_id), commit=True)
 
                                 elif category == 'belt':
                                     level = request.form.getlist('belt')
                                     for lev in level:
                                         yes = 'yes'
-                                        query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                                        query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                                         execute_query(query, (yes, product_id), commit=True)
 
                                 elif category == 'shoes':
                                     level = request.form.getlist('shoes')
                                     for lev in level:
                                         yes = 'yes'
-                                        query = 'UPDATE product_level SET {field}=? WHERE product_id=?'.format(field=lev)
+                                        query = 'UPDATE product_level SET {field}=%s WHERE product_id=%s'.format(field=lev)
                                         execute_query(query, (yes, product_id), commit=True)
 
                                 else:
@@ -612,7 +631,7 @@ def search():
     if 'q' in request.args:
         q = request.args['q']
         # Get products matching search query
-        query_string = "SELECT * FROM products WHERE pName LIKE ? ORDER BY id ASC"
+        query_string = "SELECT * FROM products WHERE pName LIKE %s ORDER BY id ASC"
         products = execute_query(query_string, ('%' + q + '%',), fetchall=True)
         flash('Showing result for: ' + q, 'success')
         return render_template('search.html', products=products, form=form)
@@ -626,10 +645,10 @@ def search():
 def profile():
     if 'user' in request.args:
         q = request.args['user']
-        result = execute_query("SELECT * FROM users WHERE id=?", (q,), fetchone=True)
+        result = execute_query("SELECT * FROM users WHERE id=%s", (q,), fetchone=True)
         if result:
             if result['id'] == session['uid']:
-                res = execute_query("SELECT * FROM orders WHERE uid=? ORDER BY id ASC", (session['uid'],), fetchall=True)
+                res = execute_query("SELECT * FROM orders WHERE uid=%s ORDER BY id ASC", (session['uid'],), fetchall=True)
                 return render_template('profile.html', result=res)
             else:
                 flash('Unauthorised', 'danger')
@@ -648,7 +667,7 @@ def settings():
     form = UpdateRegisterForm(request.form)
     if 'user' in request.args:
         q = request.args['user']
-        result = execute_query("SELECT * FROM users WHERE id=?", (q,), fetchone=True)
+        result = execute_query("SELECT * FROM users WHERE id=%s", (q,), fetchone=True)
         if result:
             if result['id'] == session['uid']:
                 if request.method == 'POST' and form.validate():
@@ -658,7 +677,7 @@ def settings():
                     mobile = form.mobile.data
 
                     # Update user in database
-                    exe = execute_query("UPDATE users SET name=?, email=?, password=?, mobile=? WHERE id=?",
+                    exe = execute_query("UPDATE users SET name=%s, email=%s, password=%s, mobile=%s WHERE id=%s",
                                       (name, email, password, mobile, q), commit=True)
                     if exe is not None:
                         flash('Profile updated', 'success')
@@ -740,20 +759,41 @@ def old_index():
 @app.route('/cart')
 @is_logged_in
 def cart():
-    # Get all items in the user's cart
-    cart_items = execute_query("""
-        SELECT c.id, c.quantity, p.id as product_id, p.pName, p.price, p.picture, p.available
-        FROM cart c
-        JOIN products p ON c.product_id = p.id
-        WHERE c.user_id = %s
-    """, (session['uid'],), fetchall=True)
+    try:
+        # First, ensure cart table exists
+        execute_query("""
+            CREATE TABLE IF NOT EXISTS cart (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                product_id INT NOT NULL,
+                quantity INT NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_user_product (user_id, product_id)
+            )
+        """, (), commit=True)
 
-    # Calculate total price
-    total = 0
-    for item in cart_items:
-        total += item['price'] * item['quantity']
+        # Get all items in the user's cart
+        cart_items = execute_query("""
+            SELECT c.id, c.quantity, p.id as product_id, p.pName, p.price, p.picture, p.available
+            FROM cart c
+            JOIN products p ON c.product_id = p.id
+            WHERE c.user_id = %s
+        """, (session['uid'],), fetchall=True)
 
-    return render_template('cart.html', cart_items=cart_items, total=total)
+        # Handle case where cart_items is None
+        if cart_items is None:
+            cart_items = []
+
+        # Calculate total price
+        total = 0
+        for item in cart_items:
+            total += item['price'] * item['quantity']
+
+        return render_template('cart.html', cart_items=cart_items, total=total)
+
+    except Exception as e:
+        flash(f'Erreur lors du chargement du panier: {str(e)}', 'danger')
+        return render_template('cart.html', cart_items=[], total=0)
 
 @app.route('/add_to_cart', methods=['POST'])
 @is_logged_in
@@ -936,7 +976,7 @@ def view_product(product_id):
         return redirect(url_for('index'))
 
     # Get similar products using content-based filtering
-    similar_products = content_based_filtering(product_id)
+    x = content_based_filtering(product_id)
 
     # Record view if user is logged in
     if 'uid' in session:
@@ -954,7 +994,8 @@ def view_product(product_id):
                         (uid, product_id), commit=True)
 
     form = OrderForm(request.form)
-    return render_template('view_product.html', product=product, similar_products=similar_products, form=form)
+    # Template expects 'tshirts' for the main product (as a list) and 'x' for similar products
+    return render_template('view_product.html', tshirts=[product], x=x, form=form)
 
 @app.route('/all-products')
 def all_products():
