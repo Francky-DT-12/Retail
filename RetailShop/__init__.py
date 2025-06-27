@@ -174,4 +174,34 @@ def page_not_found(e):
 def internal_server_error(e):
     return render_template('errors/500.html'), 500
 
+@app.before_first_request
+def initialize_database():
+    try:
+        from RetailShop.db_helper import execute_query
+
+        # Check if role column exists in users table
+        cursor = mysql.connection.cursor()
+        cursor.execute("SHOW COLUMNS FROM users LIKE 'role'")
+        role_exists = cursor.fetchone()
+
+        # Add role column if it doesn't exist
+        if not role_exists:
+            execute_query("ALTER TABLE users ADD COLUMN role INT NOT NULL DEFAULT 1", commit=True)
+            # Update existing users to have role=1 (regular users)
+            execute_query("UPDATE users SET role=1", commit=True)
+
+        # Check if admin user exists (role=0)
+        admin_exists = execute_query("SELECT * FROM users WHERE role=0", fetchall=True)
+
+        if not admin_exists:
+            # Create admin user if it doesn't exist
+            from passlib.hash import sha256_crypt
+            admin_password = sha256_crypt.encrypt("admin123")
+            execute_query("INSERT INTO users(name, email, username, password, mobile, role) VALUES(%s, %s, %s, %s, %s, %s)",
+                        ("Admin", "admin@example.com", "admin", admin_password, "", 0), commit=True)
+            print("Admin user created with username 'admin' and password 'admin123'")
+
+    except Exception as e:
+        print(f"Error initializing database: {e}")
+
 from RetailShop import routes

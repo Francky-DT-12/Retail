@@ -78,6 +78,16 @@ def login():
                     session['s_name'] = name
                     x = '1'
                     execute_query("UPDATE users SET online=%s WHERE id=%s", (x, uid), commit=True)
+
+                    # Check if user is admin (role=0)
+                    role = data.get('role')
+                    if role == 0:
+                        # Set admin session variables
+                        session['admin_logged_in'] = True
+                        session['admin_uid'] = uid
+                        session['admin_name'] = name
+                        return redirect(url_for('admin'))
+
                     return redirect(url_for('index'))
 
                 else:
@@ -122,9 +132,9 @@ def register():
             password = sha256_crypt.encrypt(str(form.password.data))
             mobile = form.mobile.data
 
-            # Insert user into database
-            execute_query("INSERT INTO users(name, email, username, password, mobile) VALUES(%s, %s, %s, %s, %s)",
-                        (name, email, username, password, mobile), commit=True)
+            # Insert user into database with role=1 (regular user)
+            execute_query("INSERT INTO users(name, email, username, password, mobile, role) VALUES(%s, %s, %s, %s, %s, %s)",
+                        (name, email, username, password, mobile, 1), commit=True)
 
             flash('You are now registered and can login', 'success')
 
@@ -383,33 +393,47 @@ def admin_login():
         username = request.form['email']
         password_candidate = request.form['password']
 
-        hashed_password_candidate = hashlib.sha256(password_candidate.encode()).hexdigest()
+        print(f"Admin login attempt with username: {username}")
 
         try:
-            # Get user by username
-            data = execute_query("SELECT * FROM admin WHERE email=%s", [username], fetchone=True)
+            # Get user by username or email
+            data = execute_query("SELECT * FROM users WHERE username=%s OR email=%s", [username, username], fetchone=True)
 
             if data:
                 # Get stored value
-                stored_password_hash = data['password']
+                password = data['password']
                 uid = data['id']
-                name = data['firstName']
+                name = data['name']
 
-                if hashed_password_candidate == stored_password_hash:
+                # Check if role column exists
+                role = data.get('role')
+                print(f"User found: {name} (ID: {uid}), Role: {role}")
+
+                # Check if user is an admin (role=0)
+                if role != 0:
+                    print(f"User {username} is not an admin (role: {role})")
+                    flash('You do not have admin privileges', 'danger')
+                    return render_template('pages/login.html')
+
+                # Compare password
+                password_match = sha256_crypt.verify(password_candidate, password)
+                print(f"Password match: {password_match}")
+
+                if password_match:
                     session['admin_logged_in'] = True
                     session['admin_uid'] = uid
                     session['admin_name'] = name
-
+                    print(f"Admin login successful: {name}")
                     return redirect(url_for('admin'))
-
                 else:
                     flash('Incorrect password', 'danger')
                     return render_template('pages/login.html')
-
             else:
+                print(f"User not found: {username}")
                 flash('Username not found', 'danger')
                 return render_template('pages/login.html')
         except Exception as e:
+            print(f"Error in admin_login: {e}")
             flash(f'An error occurred: {e}', 'danger')
             return render_template('pages/login.html')
     return render_template('pages/login.html')
@@ -1043,7 +1067,7 @@ def admin_search():
                 (f'%{query}%', f'%{query}%'), 
                 fetchall=True
             )
-            
+
             return render_template('pages/search_results.html', 
                                  products=products or [], 
                                  users=users or [], 
@@ -1052,5 +1076,5 @@ def admin_search():
         else:
             flash('Veuillez entrer un terme de recherche', 'warning')
             return redirect(url_for('admin'))
-    
+
     return redirect(url_for('admin'))

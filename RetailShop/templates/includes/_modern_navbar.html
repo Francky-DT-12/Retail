@@ -14,42 +14,54 @@
                     <h1>SHOP.CO</h1>
                 </a>
 
-                <ul class="nav-menu">
-                    <li><a href="/sales">On Sale</a></li>
-                    <li><a href="/arrivals">New Arrivals</a></li>
-                    <li><a href="/brands">Brands</a></li>
-                </ul>
+                <!-- Mobile menu toggle button -->
+                <button class="mobile-menu-toggle" type="button" aria-label="Toggle navigation">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
 
-                <div class="search-container">
-                    <form action="/search" method="get" class="search-form">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" name="q" placeholder="Search for products..." autocomplete="off">
-                        </div>
-                    </form>
-                </div>
+                <div class="nav-menu-container">
+                    <ul class="nav-menu">
+                        <li><a href="/sales">On Sale</a></li>
+                        <li><a href="/arrivals">New Arrivals</a></li>
+                        <li><a href="/brands">Brands</a></li>
+                    </ul>
 
-                <div class="nav-icons">
-                    {% if session.logged_in %}
-                    <a href="/cart" class="icon-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="icon-text">Panier</span>
-                    </a>
-                    <a href="/profile?user={{session.uid}}" class="icon-link">
-                        <i class="fas fa-user"></i>
-                        <span class="icon-text">Profil</span>
-                    </a>
-                    <a href="/out" class="icon-link" title="Déconnexion">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="icon-text">Déconnexion</span>
-                    </a>
-                    {% else %}
-                    <a href="/register" class="icon-link" >
-                        <i class="fas fa-user-plus"></i>
-                        <span class="icon-text"></span>
-                    </a>
+                    <div class="search-container">
+                        <form action="/search" method="get" class="search-form">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" name="q" placeholder="Search for products..." autocomplete="off">
+                            </div>
+                        </form>
+                    </div>
 
-                    {% endif %}
+                    <div class="nav-icons">
+                        {% if session.logged_in %}
+                        <a href="/cart" class="icon-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="icon-text">Panier</span>
+                        </a>
+                        <a href="/profile?user={{session.uid}}" class="icon-link">
+                            <i class="fas fa-user"></i>
+                            <span class="icon-text">Profil</span>
+                        </a>
+                        <a href="/out" class="icon-link" title="Déconnexion">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="icon-text">Déconnexion</span>
+                        </a>
+                        {% else %}
+                        <a href="/register" class="icon-link">
+                            <i class="fas fa-user-plus"></i>
+                            <span class="icon-text">S'inscrire</span>
+                        </a>
+                        <a href="/login" class="icon-link">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span class="icon-text">Connexion</span>
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
