@@ -1,0 +1,153 @@
+{% extends 'pages/layout.html' %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-card">
+        <h2 class="profile-title">Modifier le profil</h2>
+        
+        <form method="POST" action="{{ url_for('update_admin_profile') }}" class="profile-form" enctype="multipart/form-data">
+            <!-- Flash Messages -->
+            {% include 'includes/_flashmsg.html' %}
+            
+            <div class="form-group">
+                <label for="firstName">Prénom</label>
+                <input type="text" class="form-control" id="firstName" name="firstName" 
+                       value="{{ admin.firstName }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Nom</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" 
+                       value="{{ admin.lastName }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       value="{{ admin.email }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="mobile">Téléphone</label>
+                <input type="text" class="form-control" id="mobile" name="mobile" 
+                       value="{{ admin.mobile }}">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Adresse</label>
+                <textarea class="form-control" id="address" name="address" 
+                          rows="3">{{ admin.address }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="current_password">Mot de passe actuel (pour confirmation)</label>
+                <input type="password" class="form-control" id="current_password" 
+                       name="current_password" required>
+            </div>
+
+                <div class="form-group">
+                    <label for="image">Photo de profil</label>
+                    <input type="file" class="form-control" name="image" id="image" accept="image/*">
+                </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-save">
+                    <i class="fa fa-save"></i> Enregistrer
+                </button>
+                <a href="{{ url_for('admin_profile') }}" class="btn btn-cancel">
+                    <i class="fa fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        display: flex;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .profile-title {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #34495e;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-save {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-save:hover {
+        background: #2980b9;
+    }
+
+    .btn-cancel {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-cancel:hover {
+        background: #c0392b;
+    }
+
+    .btn i {
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}

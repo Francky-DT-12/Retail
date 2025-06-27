@@ -1,0 +1,159 @@
+{% extends 'pages/layout.html' %}
+
+{% block body %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <img src="{{ url_for('static', filename='image/admin/' ~ admin.image_profile) }}"
+                 class="profile-avatar"
+                 alt="Avatar administrateur">
+        </div>
+
+        <h3 class="profile-name">{{ admin.firstName }} {{ admin.lastName }}</h3>
+        <p class="profile-title">
+            <i class="fa fa-user profile-icon"></i> Administrateur Système
+        </p>
+
+        <div class="profile-info">
+            <div class="info-item">
+                <i class="fa fa-envelope info-icon"></i>
+                <span>{{ admin.email }}</span>
+            </div>
+            <div class="info-item">
+                <i class="fa fa-mobile info-icon"></i>
+                <span>{{ admin.mobile or 'Non renseigné' }}</span>
+            </div>
+            {% if admin.address %}
+            <div class="info-item">
+                <i class="fa fa-map-marker info-icon"></i>
+                <span>{{ admin.address }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="profile-actions">
+            <a href="{{ url_for('update_admin_profile') }}" class="edit-button">
+                <i class="fa fa-user-edit"></i> Modifier le profil
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    a {
+        text-decoration: none;
+    }
+
+    .profile-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 20px;
+    }
+
+    .profile-card {
+        width: 100%;
+        max-width: 500px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #4e73df;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+    }
+
+    .profile-name {
+        color: #2e3a4e;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .profile-title {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    .profile-icon {
+        color: #4e73df;
+        margin-right: 8px;
+    }
+
+    .profile-info {
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s ease;
+    }
+
+    .info-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-icon {
+        color: #4e73df;
+        font-size: 1.2rem;
+        min-width: 30px;
+        text-align: center;
+        margin-right: 15px;
+    }
+
+    .edit-button {
+        display: inline-block;
+        background-color: orange;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(78, 115, 223, 0.3);
+    }
+
+    .edit-button:hover {
+        background-color: #3a5bc7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 115, 223, 0.3);
+        color: white;
+    }
+
+    .fa-user-edit {
+        color: white;
+    }
+
+    .edit-button i {
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
