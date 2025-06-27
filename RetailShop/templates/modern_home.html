@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOP.CO - Find Clothes That Matches Your Style</title>
+    <link rel="icon" href="{{ url_for('static', filename='image/other/logo_icon.png') }}" type="image/x-icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="container">
+                <span>Sign up and get 20% off to your first order. <a href="#" class="signup-link">Sign Up Now</a></span>
+                <button class="close-btn">&times;</button>
+            </div>
+        </div>
+
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <h1>SHOP.CO</h1>
+                    </div>
+
+                    <ul class="nav-menu">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">Shop <i class="fas fa-chevron-down"></i></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="/mens">Hommes</a></li>
+                                <li><a href="/womens">Femmes</a></li>
+                                <li><a href="/tshirt">T-shirts</a></li>
+                                <li><a href="/shoes">Chaussures</a></li>
+                                <li><a href="/belt">Ceintures</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="/sales">On Sale</a></li>
+                        <li><a href="/arrivals">New Arrivals</a></li>
+                        <li><a href="/brands">Brands</a></li>
+                    </ul>
+
+                    <div class="search-container">
+                        <form action="/search" method="get" class="search-form">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" name="q" placeholder="Search for products..." autocomplete="off">
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="nav-icons">
+                        <a href="/cart" class="icon-link">
+                            <i class="fas fa-shopping-cart"></i>
+                        </a>
+                        <a href="/profile" class="icon-link">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>FIND CLOTHES THAT MATCHES YOUR STYLE</h1>
+                    <p>Browse through our diverse range of meticulously crafted garments, designed to bring out your individuality and cater to your sense of style.</p>
+                    <a href="/all-products" class="shop-now-btn">Shop Now</a>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <h3>200+</h3>
+                            <p>International Brands</p>
+                        </div>
+                        <div class="stat">
+                            <h3>2,000+</h3>
+                            <p>High-Quality Products</p>
+                        </div>
+                        <div class="stat">
+                            <h3>30,000+</h3>
+                            <p>Happy Customers</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-image">
+                    <img src="{{ url_for('static', filename='image/other/t-shirt-wallpaper.jpg') }}" alt="Fashion Couple">
+                    <div class="star star-1">✦</div>
+                    <div class="star star-2">✦</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brands Section -->
+    <section class="brands">
+        <div class="container">
+            <div class="brands-grid">
+                <div class="brand">VERSACE</div>
+                <div class="brand">ZARA</div>
+                <div class="brand">GUCCI</div>
+                <div class="brand">PRADA</div>
+                <div class="brand">Calvin Klein</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <section class="new-arrivals">
+        <div class="container">
+            <h2 class="section-title">NEW ARRIVALS</h2>
+            <div class="products-grid">
+                {% for product in tshirt[:4] %}
+                <a href="/view_product/{{ product.id }}" class="product-link">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" alt="{{ product.pName }}">
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ product.pName }}</h3>
+                            <div class="rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span>4.5/5</span>
+                            </div>
+                            <div class="price">
+                                <span class="current-price">${{ product.price }}</span>
+                                {% if loop.index % 2 == 0 %}
+                                <span class="original-price">${{ (product.price * 1.2)|round|int }}</span>
+                                <span class="discount">-20%</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="view-all-container">
+                <button class="view-all-btn">View All</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Selling Section -->
+    <section class="top-selling">
+        <div class="container">
+            <h2 class="section-title">TOP SELLING</h2>
+            <div class="products-grid">
+                {% for product in wallet[:4] %}
+                <a href="/view_product/{{ product.id }}" class="product-link">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" alt="{{ product.pName }}">
+                        </div>
+                        <div class="product-info">
+                            <h3>{{ product.pName }}</h3>
+                            <div class="rating">
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span>5.0/5</span>
+                            </div>
+                            <div class="price">
+                                <span class="current-price">${{ product.price }}</span>
+                                {% if loop.index == 1 %}
+                                <span class="original-price">${{ (product.price * 1.15)|round|int }}</span>
+                                <span class="discount">-30%</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="view-all-container">
+                <button class="view-all-btn">View All</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Browse by Style Section -->
+    <section class="browse-style">
+        <div class="container">
+            <h2 class="section-title">BROWSE BY DRESS STYLE</h2>
+            <div class="style-grid">
+                <div class="style-card casual">
+                    <h3>Casual</h3>
+                    <div class="style-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                </div>
+                <div class="style-card formal">
+                    <h3>Formal</h3>
+                    <div class="style-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                </div>
+                <div class="style-card party">
+                    <h3>Party</h3>
+                    <div class="style-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                </div>
+                <div class="style-card gym">
+                    <h3>Gym</h3>
+                    <div class="style-placeholder" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <h2 class="section-title">OUR HAPPY CUSTOMERS</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>Sarah M. <i class="fas fa-check-circle verified"></i></h4>
+                    <p>"I'm blown away by the quality and style of the clothes I received from Shop.co. From casual wear to elegant dresses, every piece I've bought has exceeded my expectations."</p>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>Alex K. <i class="fas fa-check-circle verified"></i></h4>
+                    <p>"Finding clothes that align with my personal style used to be a challenge until I discovered Shop.co. The range of options they offer is truly remarkable, catering to a variety of tastes and occasions."</p>
+                </div>
+                <div class="testimonial">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>James L. <i class="fas fa-check-circle verified"></i></h4>
+                    <p>"As someone who's always on the lookout for unique fashion pieces, I'm thrilled to have stumbled upon Shop.co. The selection of clothes is not only diverse but also on-point with the latest trends."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter">
+        <div class="container">
+            <div class="newsletter-content">
+                <h2>STAY UPTO DATE ABOUT OUR LATEST OFFERS</h2>
+                <div class="newsletter-form">
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" placeholder="Enter your email address">
+                    </div>
+                    <button type="submit">Subscribe to Newsletter</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>SHOP.CO</h3>
+                    <p>We have clothes that suits your style and which you're proud to wear. From women to men.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>COMPANY</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Features</a></li>
+                        <li><a href="#">Works</a></li>
+                        <li><a href="#">Career</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>HELP</h4>
+                    <ul>
+                        <li><a href="#">Customer Support</a></li>
+                        <li><a href="#">Delivery Details</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>FAQ</h4>
+                    <ul>
+                        <li><a href="#">Account</a></li>
+                        <li><a href="#">Manage Deliveries</a></li>
+                        <li><a href="#">Orders</a></li>
+                        <li><a href="#">Payments</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>RESOURCES</h4>
+                    <ul>
+                        <li><a href="#">Free eBooks</a></li>
+                        <li><a href="#">Development Tutorial</a></li>
+                        <li><a href="#">How to - Blog</a></li>
+                        <li><a href="#">Youtube Playlist</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-divider"></div>
+                <div class="footer-bottom-content">
+                    <p>Shop.co © 2000-2023, All Rights Reserved</p>
+                    <div class="payment-methods">
+                        <div class="payment-icon">💳</div>
+                        <div class="payment-icon">💰</div>
+                        <div class="payment-icon">📱</div>
+                        <div class="payment-icon">🏦</div>
+                        <div class="payment-icon">🔒</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/modern-script.js') }}"></script>
+</body>
+</html>

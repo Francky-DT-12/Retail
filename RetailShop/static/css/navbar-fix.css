@@ -1,0 +1,106 @@
+/* Navbar Dropdown Fixes - CSS pour corriger les problèmes de dropdown */
+
+/* S'assurer que les dropdowns de la navbar fonctionnent correctement */
+.navbar .dropdown-menu {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 8px 0;
+    margin-top: 8px;
+    min-width: 180px;
+    z-index: 1050 !important;
+    display: none; /* Masqué par défaut */
+}
+
+/* Styles pour les éléments du dropdown */
+.navbar .dropdown-item {
+    padding: 10px 20px;
+    font-weight: 400;
+    color: #333;
+    transition: all 0.2s ease;
+    display: block;
+    width: 100%;
+    clear: both;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+}
+
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+    background-color: #f8f9fa;
+    color: #000;
+    text-decoration: none;
+}
+
+/* Flèche du dropdown */
+.navbar .dropdown-toggle::after {
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+    margin-left: 0.5em;
+    vertical-align: 0.125em;
+}
+
+/* Hover effect pour desktop */
+@media (min-width: 768px) {
+    .navbar .dropdown:hover .dropdown-menu {
+        display: block;
+        animation: fadeInDown 0.3s ease;
+    }
+}
+
+/* Animation pour l'apparition du dropdown */
+.navbar .dropdown-menu.show {
+    display: block !important;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 767px) {
+    .navbar .dropdown:hover .dropdown-menu {
+        display: none; /* Désactiver le hover sur mobile */
+    }
+    
+    .navbar .dropdown-menu {
+        position: static;
+        float: none;
+        width: auto;
+        margin-top: 0;
+        background-color: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+    
+    .navbar .dropdown-item {
+        padding: 8px 15px;
+        color: #000;
+    }
+}
+
+/* Correction pour la navbar fixed-top */
+.navbar.fixed-top {
+    z-index: 1030;
+}
+
+.navbar .dropdown-menu {
+    z-index: 1040;
+}
+
+/* S'assurer que le dropdown est bien positionné */
+.navbar .dropdown {
+    position: relative;
+}

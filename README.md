@@ -1,3 +1,4 @@
+Prérequis : Python 3.8.x
 # E-Commerce-Website-Using-Python
 
 ## Get In Touch

@@ -1,0 +1,106 @@
+-- Create the database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS shoptubedb;
+
+-- Create the user if it doesn't exist and grant privileges
+CREATE USER IF NOT EXISTS 'webapp'@'localhost' IDENTIFIED BY 'motdepassefort';
+GRANT ALL PRIVILEGES ON shoptubedb.* TO 'webapp'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Use the database
+USE shoptubedb;
+
+-- Create tables
+CREATE TABLE IF NOT EXISTS `admin` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firstName` varchar(125) NOT NULL,
+  `lastName` varchar(125) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `mobile` varchar(25) NOT NULL,
+  `address` text NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `confirmCode` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) DEFAULT NULL,
+  `ofname` text NOT NULL,
+  `pid` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `oplace` text NOT NULL,
+  `mobile` varchar(15) NOT NULL,
+  `dstatus` varchar(10) NOT NULL DEFAULT 'no',
+  `odate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ddate` date DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pName` varchar(100) NOT NULL,
+  `price` int(11) NOT NULL,
+  `description` text NOT NULL,
+  `available` int(11) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  `item` varchar(100) NOT NULL,
+  `pCode` varchar(20) NOT NULL,
+  `picture` text NOT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `product_level` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) NOT NULL,
+  `v_shape` varchar(10) NOT NULL DEFAULT 'no',
+  `polo` varchar(10) NOT NULL DEFAULT 'no',
+  `clean_text` varchar(10) NOT NULL DEFAULT 'no',
+  `design` varchar(10) NOT NULL DEFAULT 'no',
+  `chain` varchar(10) NOT NULL DEFAULT 'no',
+  `leather` varchar(10) NOT NULL DEFAULT 'no',
+  `hook` varchar(10) NOT NULL DEFAULT 'no',
+  `color` varchar(10) NOT NULL DEFAULT 'no',
+  `formal` varchar(10) NOT NULL DEFAULT 'no',
+  `converse` varchar(10) NOT NULL DEFAULT 'no',
+  `loafer` varchar(10) NOT NULL DEFAULT 'no',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `product_view` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `username` varchar(25) NOT NULL,
+  `password` varchar(100) NOT NULL,
+  `mobile` varchar(20) NOT NULL,
+  `reg_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `online` varchar(1) NOT NULL DEFAULT '0',
+  `activation` varchar(3) NOT NULL DEFAULT 'yes',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=16 DEFAULT CHARSET=latin1;
+
+-- Insert sample data
+INSERT INTO `admin` (`id`, `firstName`, `lastName`, `email`, `mobile`, `address`, `password`, `type`, `confirmCode`) VALUES
+(4, 'Nur', 'Mohsin', 'mohsin@gmail.com', '01677876551', 'Dhaka', '$5$rounds=535000$WOAOMdgoK2JpZLY5$RFH9BZQCB3NEvG4R/FofxxJL/PUaeZm7T6G9P3PRg05', 'manager', '0');
+
+INSERT INTO `products` (`id`, `pName`, `price`, `description`, `available`, `category`, `item`, `pCode`, `picture`, `date`) VALUES
+(1, 'T-Shirt', 120, 'T-Shirt', 4, 'tshirt', 't-shirt', 't-007', 'MSTS14738.jpg', '2018-09-20 07:10:40'),
+(2, 'Baborry wallet', 6000, 'Baborry-Double-Zipper-Coin-Bag-RFID-Blocking-Men-Wallets-New-Brand-PU-Leather-Wallet-Money-Purses', 3, 'wallet', 'wallet', 'w-004', 'IMG_1212.jpg', '2018-09-20 07:40:28'),
+(3, 'Loafer Shoes', 2000, 'Loafer black shoes', 8, 'shoes', 'shoes', 's-001', '8544789_5_.jpg', '2018-09-20 08:33:57'),
+(4, 'Artificial Belt', 1200, 'Black artificial belt', 9, 'belt', 'belt', 'b-001', '0283BLT.jpg', '2018-09-20 08:35:44');
+
+INSERT INTO `product_level` (`id`, `product_id`, `v_shape`, `polo`, `clean_text`, `design`, `chain`, `leather`, `hook`, `color`, `formal`, `converse`, `loafer`) VALUES
+(1, 1, 'no', 'no', 'yes', 'no', 'no', 'no', 'no', 'no', 'no', 'no', 'no'),
+(2, 2, 'no', 'no', 'no', 'no', 'yes', 'yes', 'no', 'no', 'no', 'no', 'no'),
+(3, 3, 'no', 'no', 'no', 'no', 'no', 'yes', 'no', 'no', 'no', 'no', 'yes'),
+(4, 4, 'no', 'no', 'no', 'no', 'no', 'yes', 'yes', 'no', 'no', 'no', 'no');

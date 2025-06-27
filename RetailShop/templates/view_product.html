@@ -29,9 +29,38 @@
                         </div>
                         <div class="card-body">
                             <h3 class="card-title">{{ product.pName}}</h3>
-                            <h4>${{ product.price}}</h4>
+                            <h4>{{ product.price}} €</h4>
                             <p class="card-text">{{ product.description}}</p>
-                            <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Order Now</a>
+
+                            {% if product.available > 0 %}
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-success me-2">En stock</span>
+                                <span class="text-muted small">{{ product.available }} disponible(s)</span>
+                            </div>
+
+                            <form method="POST" action="{{ url_for('add_to_cart') }}" class="mb-3">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <div class="d-flex">
+                                    <select name="quantity" class="form-select me-2" style="width: 80px;">
+                                        {% for i in range(1, min(product.available, 5) + 1) %}
+                                            <option value="{{ i }}">{{ i }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-cart-plus me-1"></i> Ajouter au panier
+                                    </button>
+                                </div>
+                            </form>
+                            {% else %}
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-danger me-2">Épuisé</span>
+                            </div>
+                            <button class="btn btn-secondary mb-3" disabled>
+                                Indisponible
+                            </button>
+                            {% endif %}
+
+                            <a href="/{{product.category}}?order={{product.id}}" class="btn btn-outline-success">Commander directement</a>
                         </div>
                     </div>
                 </div>
