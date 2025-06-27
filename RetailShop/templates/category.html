@@ -3,15 +3,15 @@
 {% block body %}
 <div class="container py-5">
     <h1 class="mb-4">{{ category }}</h1>
-    
+
     {% include 'includes/_flashmsg.html' %}
-    
+
     <div class="row">
         {% if products %}
             {% for product in products %}
             <div class="col-md-3 mb-4">
                 <div class="card h-100 shadow-sm">
-                    <img src="{{ url_for('static', filename='image/product/' + product.picture) }}" class="card-img-top" alt="{{ product.pName }}" style="height: 200px; object-fit: cover;">
+                    <img src="{{ url_for('static', filename='image/product/' + product.category + '/' + product.picture) }}" class="card-img-top" alt="{{ product.pName }}" style="height: 200px; object-fit: cover;">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">{{ product.pName }}</h5>
                         <p class="card-text text-muted small">{{ product.description }}</p>

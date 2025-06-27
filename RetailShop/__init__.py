@@ -92,37 +92,38 @@ def wrappers(func, *args, **kwargs):
 
 def content_based_filtering(product_id):
     try:
-        # Check if MySQL connection is available
-        if not hasattr(mysql, 'connection') or mysql.connection is None:
-            print("Database connection error. Please check your MySQL configuration.")
-            return ''
+        from RetailShop.db_helper import get_db, execute_query
 
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM products WHERE id=%s", (product_id,))  # getting id row
-        data = cur.fetchone()  # get row info
-        if not data:
+        # Get product details
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchone=True)
+        if not product:
             print(f"No product found with ID: {product_id}")
-            cur.close()
             return ''
 
-        data_cat = data['category']  # get id category ex shirt
+        data_cat = product['category']  # get id category ex shirt
         print('Showing result for Product Id: ' + product_id)
-        category_matched = cur.execute("SELECT * FROM products WHERE category=%s", (data_cat,))  # get all shirt category
+
+        # Get all products in the same category
+        cat_products = execute_query("SELECT * FROM products WHERE category=%s", (data_cat,), fetchall=True)
+        if not cat_products:
+            print(f"No products found in category: {data_cat}")
+            return ''
+
+        category_matched = len(cat_products)
         print('Total product matched: ' + str(category_matched))
-        cat_product = cur.fetchall()  # get all row
-        cur.execute("SELECT * FROM product_level WHERE product_id=%s", (product_id,))  # id level info
-        id_level = cur.fetchone()
+
+        # Get product level info
+        id_level = execute_query("SELECT * FROM product_level WHERE product_id=%s", (product_id,), fetchone=True)
         if not id_level:
             print(f"No product level found for ID: {product_id}")
-            cur.close()
             return ''
 
         recommend_id = []
         cate_level = ['v_shape', 'polo', 'clean_text', 'design', 'leather', 'color', 'formal', 'converse', 'loafer', 'hook',
                       'chain']
-        for product_f in cat_product:
-            cur.execute("SELECT * FROM product_level WHERE product_id=%s", (product_f['id'],))
-            f_level = cur.fetchone()
+
+        for product_f in cat_products:
+            f_level = execute_query("SELECT * FROM product_level WHERE product_id=%s", (product_f['id'],), fetchone=True)
             if not f_level:
                 continue
 
@@ -133,17 +134,15 @@ def content_based_filtering(product_id):
                         match_score += 1
                 if match_score == 11:
                     recommend_id.append(f_level['product_id'])
+
         print('Total recommendation found: ' + str(recommend_id))
+
         if recommend_id:
-            cur = mysql.connection.cursor()
-            placeholders = ','.join((str(n) for n in recommend_id))
-            query = 'SELECT * FROM products WHERE id IN (%s)' % placeholders
-            cur.execute(query)
-            recommend_list = cur.fetchall()
-            cur.close()
+            placeholders = ','.join(['%s'] * len(recommend_id))
+            query = f'SELECT * FROM products WHERE id IN ({placeholders})'
+            recommend_list = execute_query(query, recommend_id, fetchall=True)
             return recommend_list, recommend_id, category_matched, product_id
         else:
-            cur.close()
             return ''
     except Exception as e:
         print(f"Error in content_based_filtering: {e}")

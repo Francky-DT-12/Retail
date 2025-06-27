@@ -12,11 +12,16 @@ def get_db():
 def execute_query(query, args=(), commit=False, fetchone=False, fetchall=False):
     """Execute a MySQL query and return results"""
     try:
-        cur = mysql.connection.cursor()
+        connection = get_db()
+        if connection is None:
+            print("Database connection error. Please check your MySQL configuration.")
+            return None
+
+        cur = connection.cursor()
         cur.execute(query, args)
-        
+
         if commit:
-            mysql.connection.commit()
+            connection.commit()
             result = cur.rowcount
         elif fetchone:
             result = cur.fetchone()
@@ -24,7 +29,7 @@ def execute_query(query, args=(), commit=False, fetchone=False, fetchall=False):
             result = cur.fetchall()
         else:
             result = cur.rowcount
-            
+
         cur.close()
         return result
     except Exception as e:

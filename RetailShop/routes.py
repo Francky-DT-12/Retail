@@ -16,10 +16,10 @@ def index():
     form = OrderForm(request.form)
     try:
         # Get products for different categories
-        tshirt = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('tshirt',), fetchall=True)
-        wallet = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('wallet',), fetchall=True)
-        belt = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('belt',), fetchall=True)
-        shoes = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('shoes',), fetchall=True)
+        tshirt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('tshirt',), fetchall=True)
+        wallet = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('wallet',), fetchall=True)
+        belt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('belt',), fetchall=True)
+        shoes = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('shoes',), fetchall=True)
 
         if tshirt is None or wallet is None or belt is None or shoes is None:
             flash('Database error. Please check your database configuration.', 'danger')
@@ -43,7 +43,7 @@ def login():
             password_candidate = form.password.data
 
             # Get user by username
-            data = execute_query("SELECT * FROM users WHERE username=?", (username,), fetchone=True)
+            data = execute_query("SELECT * FROM users WHERE username=%s", (username,), fetchone=True)
 
             if data:
                 # Get stored value
@@ -58,7 +58,7 @@ def login():
                     session['uid'] = uid
                     session['s_name'] = name
                     x = '1'
-                    execute_query("UPDATE users SET online=? WHERE id=?", (x, uid), commit=True)
+                    execute_query("UPDATE users SET online=%s WHERE id=%s", (x, uid), commit=True)
                     return redirect(url_for('index'))
 
                 else:
@@ -80,7 +80,7 @@ def logout():
         try:
             uid = session['uid']
             x = '0'
-            execute_query("UPDATE users SET online=? WHERE id=?", (x, uid), commit=True)
+            execute_query("UPDATE users SET online=%s WHERE id=%s", (x, uid), commit=True)
         except Exception as e:
             print(f"Error updating user online status: {e}")
             # Continue with logout even if database update fails
@@ -104,7 +104,7 @@ def register():
             mobile = form.mobile.data
 
             # Insert user into database
-            execute_query("INSERT INTO users(name, email, username, password, mobile) VALUES(?, ?, ?, ?, ?)",
+            execute_query("INSERT INTO users(name, email, username, password, mobile) VALUES(%s, %s, %s, %s, %s)",
                         (name, email, username, password, mobile), commit=True)
 
             flash('You are now registered and can login', 'success')
@@ -121,7 +121,7 @@ def chatting(id):
         form = MessageForm(request.form)
 
         # lid name
-        l_data = execute_query("SELECT * FROM users WHERE id=?", [id], fetchone=True)
+        l_data = execute_query("SELECT * FROM users WHERE id=%s", [id], fetchone=True)
         if l_data:
             session['name'] = l_data['name']
             uid = session['uid']
@@ -129,7 +129,7 @@ def chatting(id):
 
             if request.method == 'POST' and form.validate():
                 txt_body = form.body.data
-                execute_query("INSERT INTO messages(body, msg_by, msg_to) VALUES(?, ?, ?)",
+                execute_query("INSERT INTO messages(body, msg_by, msg_to) VALUES(%s, %s, %s)",
                             (txt_body, id, uid), commit=True)
 
             # Get users
@@ -148,7 +148,7 @@ def chats():
         id = session['lid']
         uid = session['uid']
         # Get messages
-        chats = execute_query("SELECT * FROM messages WHERE (msg_by=? AND msg_to=?) OR (msg_by=? AND msg_to=?) "
+        chats = execute_query("SELECT * FROM messages WHERE (msg_by=%s AND msg_to=%s) OR (msg_by=%s AND msg_to=%s) "
                     "ORDER BY id ASC", (id, uid, uid, id), fetchall=True)
         return render_template('chats.html', chats=chats)
     return redirect(url_for('login'))
@@ -158,7 +158,7 @@ def tshirt():
     form = OrderForm(request.form)
     # Get products
     values = 'tshirt'
-    products = execute_query("SELECT * FROM products WHERE category=? ORDER BY id ASC", (values,), fetchall=True)
+    products = execute_query("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,), fetchall=True)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -174,11 +174,11 @@ def tshirt():
         if 'uid' in session:
             uid = session['uid']
             execute_query("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
                          (uid, pid, name, mobile, order_place, quantity, now_time), commit=True)
         else:
             execute_query("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
                          (pid, name, mobile, order_place, quantity, now_time), commit=True)
 
         flash('Order successful', 'success')
@@ -186,7 +186,7 @@ def tshirt():
 
     if 'view' in request.args:
         product_id = request.args['view']
-        product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchall=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchall=True)
         x = content_based_filtering(product_id)
         wrappered = wrappers(content_based_filtering, product_id)
         execution_time = timeit.timeit(wrappered, number=0)
@@ -194,21 +194,21 @@ def tshirt():
 
         if 'uid' in session:
             uid = session['uid']
-            result = execute_query("SELECT * FROM product_view WHERE user_id=? AND product_id=?", (uid, product_id), fetchall=True)
+            result = execute_query("SELECT * FROM product_view WHERE user_id=%s AND product_id=%s", (uid, product_id), fetchall=True)
 
             if result:
                 now = datetime.datetime.now()
                 now_time = now.strftime("%y-%m-%d %H:%M:%S")
-                execute_query("UPDATE product_view SET date=? WHERE user_id=? AND product_id=?",
+                execute_query("UPDATE product_view SET date=%s WHERE user_id=%s AND product_id=%s",
                             (now_time, uid, product_id), commit=True)
             else:
-                execute_query("INSERT INTO product_view(user_id, product_id) VALUES(?, ?)", (uid, product_id), commit=True)
+                execute_query("INSERT INTO product_view(user_id, product_id) VALUES(%s, %s)", (uid, product_id), commit=True)
 
         return render_template('view_product.html', x=x, tshirts=product)
 
     elif 'order' in request.args:
         product_id = request.args['order']
-        product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchall=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchall=True)
         x = content_based_filtering(product_id)
         return render_template('order_product.html', x=x, tshirts=product, form=form)
 
@@ -219,7 +219,7 @@ def wallet():
     form = OrderForm(request.form)
     # Get products
     values = 'wallet'
-    products = execute_query("SELECT * FROM products WHERE category=? ORDER BY id ASC", (values,), fetchall=True)
+    products = execute_query("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,), fetchall=True)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -236,11 +236,11 @@ def wallet():
         if 'uid' in session:
             uid = session['uid']
             execute_query("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
                          (uid, pid, name, mobile, order_place, quantity, now_time), commit=True)
         else:
             execute_query("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
                          (pid, name, mobile, order_place, quantity, now_time), commit=True)
 
         flash('Order successful', 'success')
@@ -250,12 +250,12 @@ def wallet():
         q = request.args['view']
         product_id = q
         x = content_based_filtering(product_id)
-        products = execute_query("SELECT * FROM products WHERE id=?", (q,), fetchall=True)
+        products = execute_query("SELECT * FROM products WHERE id=%s", (q,), fetchall=True)
         return render_template('view_product.html', x=x, tshirts=products)
 
     elif 'order' in request.args:
         product_id = request.args['order']
-        product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchall=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchall=True)
         x = content_based_filtering(product_id)
         return render_template('order_product.html', x=x, tshirts=product, form=form)
 
@@ -266,7 +266,7 @@ def belt():
     form = OrderForm(request.form)
     # Get products
     values = 'belt'
-    products = execute_query("SELECT * FROM products WHERE category=? ORDER BY id ASC", (values,), fetchall=True)
+    products = execute_query("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,), fetchall=True)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -282,11 +282,11 @@ def belt():
         if 'uid' in session:
             uid = session['uid']
             execute_query("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
                          (uid, pid, name, mobile, order_place, quantity, now_time), commit=True)
         else:
             execute_query("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
                          (pid, name, mobile, order_place, quantity, now_time), commit=True)
 
         flash('Order successful', 'success')
@@ -296,12 +296,12 @@ def belt():
         q = request.args['view']
         product_id = q
         x = content_based_filtering(product_id)
-        products = execute_query("SELECT * FROM products WHERE id=?", (q,), fetchall=True)
+        products = execute_query("SELECT * FROM products WHERE id=%s", (q,), fetchall=True)
         return render_template('view_product.html', x=x, tshirts=products)
 
     elif 'order' in request.args:
         product_id = request.args['order']
-        product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchall=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchall=True)
         x = content_based_filtering(product_id)
         return render_template('order_product.html', x=x, tshirts=product, form=form)
 
@@ -312,7 +312,7 @@ def shoes():
     form = OrderForm(request.form)
     # Get products
     values = 'shoes'
-    products = execute_query("SELECT * FROM products WHERE category=? ORDER BY id ASC", (values,), fetchall=True)
+    products = execute_query("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,), fetchall=True)
 
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -328,11 +328,11 @@ def shoes():
         if 'uid' in session:
             uid = session['uid']
             execute_query("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
                          (uid, pid, name, mobile, order_place, quantity, now_time), commit=True)
         else:
             execute_query("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
-                         "VALUES(?, ?, ?, ?, ?, ?)",
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
                          (pid, name, mobile, order_place, quantity, now_time), commit=True)
 
         flash('Order successful', 'success')
@@ -342,12 +342,12 @@ def shoes():
         q = request.args['view']
         product_id = q
         x = content_based_filtering(product_id)
-        products = execute_query("SELECT * FROM products WHERE id=?", (q,), fetchall=True)
+        products = execute_query("SELECT * FROM products WHERE id=%s", (q,), fetchall=True)
         return render_template('view_product.html', x=x, tshirts=products)
 
     elif 'order' in request.args:
         product_id = request.args['order']
-        product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchall=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchall=True)
         x = content_based_filtering(product_id)
         return render_template('order_product.html', x=x, tshirts=product, form=form)
 
@@ -682,7 +682,7 @@ def developer():
     form = DeveloperForm(request.form)
     if request.method == 'POST' and form.validate():
         q = form.id.data
-        product = execute_query("SELECT * FROM products WHERE id=?", (q,), fetchone=True)
+        product = execute_query("SELECT * FROM products WHERE id=%s", (q,), fetchone=True)
         if product:
             x = content_based_filtering(q)
             wrappered = wrappers(content_based_filtering, q)
@@ -701,10 +701,10 @@ def modern_index():
     form = OrderForm(request.form)
     try:
         # Get products for different categories
-        tshirt = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('tshirt',), fetchall=True)
-        wallet = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('wallet',), fetchall=True)
-        belt = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('belt',), fetchall=True)
-        shoes = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('shoes',), fetchall=True)
+        tshirt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('tshirt',), fetchall=True)
+        wallet = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('wallet',), fetchall=True)
+        belt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('belt',), fetchall=True)
+        shoes = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('shoes',), fetchall=True)
 
         if tshirt is None or wallet is None or belt is None or shoes is None:
             flash('Database error. Please check your database configuration.', 'danger')
@@ -721,10 +721,10 @@ def old_index():
     form = OrderForm(request.form)
     try:
         # Get products for different categories
-        tshirt = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('tshirt',), fetchall=True)
-        wallet = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('wallet',), fetchall=True)
-        belt = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('belt',), fetchall=True)
-        shoes = execute_query("SELECT * FROM products WHERE category=? ORDER BY RANDOM() LIMIT 4", ('shoes',), fetchall=True)
+        tshirt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('tshirt',), fetchall=True)
+        wallet = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('wallet',), fetchall=True)
+        belt = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('belt',), fetchall=True)
+        shoes = execute_query("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", ('shoes',), fetchall=True)
 
         if tshirt is None or wallet is None or belt is None or shoes is None:
             flash('Database error. Please check your database configuration.', 'danger')
@@ -745,7 +745,7 @@ def cart():
         SELECT c.id, c.quantity, p.id as product_id, p.pName, p.price, p.picture, p.available
         FROM cart c
         JOIN products p ON c.product_id = p.id
-        WHERE c.user_id = ?
+        WHERE c.user_id = %s
     """, (session['uid'],), fetchall=True)
 
     # Calculate total price
@@ -764,7 +764,7 @@ def add_to_cart():
         quantity = form.quantity.data
 
         # Check if product exists and is available
-        product = execute_query("SELECT * FROM products WHERE id = ?", (product_id,), fetchone=True)
+        product = execute_query("SELECT * FROM products WHERE id = %s", (product_id,), fetchone=True)
         if not product:
             flash("Produit non trouvé", "danger")
             return redirect(request.referrer or url_for('index'))
@@ -775,7 +775,7 @@ def add_to_cart():
 
         # Check if product is already in cart
         existing_item = execute_query(
-            "SELECT * FROM cart WHERE user_id = ? AND product_id = ?", 
+            "SELECT * FROM cart WHERE user_id = %s AND product_id = %s", 
             (session['uid'], product_id), 
             fetchone=True
         )
@@ -788,7 +788,7 @@ def add_to_cart():
                 return redirect(request.referrer or url_for('index'))
 
             execute_query(
-                "UPDATE cart SET quantity = ? WHERE id = ?",
+                "UPDATE cart SET quantity = %s WHERE id = %s",
                 (new_quantity, existing_item['id']),
                 commit=True
             )
@@ -796,7 +796,7 @@ def add_to_cart():
         else:
             # Add new item to cart
             execute_query(
-                "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)",
+                "INSERT INTO cart (user_id, product_id, quantity) VALUES (%s, %s, %s)",
                 (session['uid'], product_id, quantity),
                 commit=True
             )
@@ -812,7 +812,7 @@ def add_to_cart():
 def remove_from_cart(cart_id):
     # Check if cart item belongs to user
     cart_item = execute_query(
-        "SELECT * FROM cart WHERE id = ? AND user_id = ?", 
+        "SELECT * FROM cart WHERE id = %s AND user_id = %s", 
         (cart_id, session['uid']), 
         fetchone=True
     )
@@ -822,7 +822,7 @@ def remove_from_cart(cart_id):
         return redirect(url_for('cart'))
 
     # Remove item from cart
-    execute_query("DELETE FROM cart WHERE id = ?", (cart_id,), commit=True)
+    execute_query("DELETE FROM cart WHERE id = %s", (cart_id,), commit=True)
     flash("Article supprimé du panier", "success")
     return redirect(url_for('cart'))
 
@@ -836,7 +836,7 @@ def checkout():
         SELECT c.id, c.quantity, p.id as product_id, p.pName, p.price, p.picture, p.available
         FROM cart c
         JOIN products p ON c.product_id = p.id
-        WHERE c.user_id = ?
+        WHERE c.user_id = %s
     """, (session['uid'],), fetchall=True)
 
     if not cart_items:
@@ -856,7 +856,7 @@ def checkout():
         # Create orders for each cart item
         for item in cart_items:
             # Check if product is still available
-            product = execute_query("SELECT * FROM products WHERE id = ?", (item['product_id'],), fetchone=True)
+            product = execute_query("SELECT * FROM products WHERE id = %s", (item['product_id'],), fetchone=True)
             if not product or product['available'] < item['quantity']:
                 flash(f"Le produit {item['pName']} n'est plus disponible en quantité suffisante", "danger")
                 return redirect(url_for('cart'))
@@ -864,19 +864,19 @@ def checkout():
             # Create order
             execute_query("""
                 INSERT INTO orders (uid, ofname, pid, quantity, oplace, mobile, dstatus)
-                VALUES (?, ?, ?, ?, ?, ?, 'no')
+                VALUES (%s, %s, %s, %s, %s, %s, 'no')
             """, (session['uid'], name, item['product_id'], item['quantity'], address, mobile), commit=True)
 
             # Update product availability
             new_available = product['available'] - item['quantity']
             execute_query(
-                "UPDATE products SET available = ? WHERE id = ?",
+                "UPDATE products SET available = %s WHERE id = %s",
                 (new_available, item['product_id']),
                 commit=True
             )
 
         # Clear cart
-        execute_query("DELETE FROM cart WHERE user_id = ?", (session['uid'],), commit=True)
+        execute_query("DELETE FROM cart WHERE user_id = %s", (session['uid'],), commit=True)
 
         flash("Commande passée avec succès", "success")
         return redirect(url_for('orders'))
@@ -887,19 +887,19 @@ def checkout():
 @app.route('/mens')
 def mens():
     form = OrderForm(request.form)
-    products = execute_query("SELECT * FROM products WHERE category IN ('tshirt', 'wallet', 'belt', 'shoes') AND item='mens'", fetchall=True)
+    products = execute_query("SELECT * FROM products WHERE category IN ('tshirt', 'wallet', 'belt', 'shoes') AND item='mens'", (), fetchall=True)
     return render_template('category.html', products=products, form=form, category="Hommes")
 
 @app.route('/womens')
 def womens():
     form = OrderForm(request.form)
-    products = execute_query("SELECT * FROM products WHERE category IN ('tshirt', 'wallet', 'belt', 'shoes') AND item='womens'", fetchall=True)
+    products = execute_query("SELECT * FROM products WHERE category IN ('tshirt', 'wallet', 'belt', 'shoes') AND item='womens'", (), fetchall=True)
     return render_template('category.html', products=products, form=form, category="Femmes")
 
 @app.route('/arrivals')
 def arrivals():
     form = OrderForm(request.form)
-    products = execute_query("SELECT * FROM products ORDER BY date DESC LIMIT 8", fetchall=True)
+    products = execute_query("SELECT * FROM products ORDER BY date DESC LIMIT 8", (), fetchall=True)
     return render_template('category.html', products=products, form=form, category="Nouveautés")
 
 @app.route('/new-arrivals')
@@ -918,18 +918,18 @@ def sales():
         GROUP BY p.id
         ORDER BY order_count DESC
         LIMIT 8
-    """, fetchall=True)
+    """, (), fetchall=True)
 
     # Fallback if no orders exist
     if not products:
-        products = execute_query("SELECT * FROM products ORDER BY RANDOM() LIMIT 8", fetchall=True)
+        products = execute_query("SELECT * FROM products ORDER BY RAND() LIMIT 8", (), fetchall=True)
 
     return render_template('category.html', products=products, form=form, category="Meilleures Ventes")
 
 @app.route('/view_product/<int:product_id>')
 def view_product(product_id):
     # Get product details
-    product = execute_query("SELECT * FROM products WHERE id=?", (product_id,), fetchone=True)
+    product = execute_query("SELECT * FROM products WHERE id=%s", (product_id,), fetchone=True)
 
     if not product:
         flash('Produit non trouvé', 'danger')
@@ -941,16 +941,16 @@ def view_product(product_id):
     # Record view if user is logged in
     if 'uid' in session:
         uid = session['uid']
-        result = execute_query("SELECT * FROM product_view WHERE user_id=? AND product_id=?", 
+        result = execute_query("SELECT * FROM product_view WHERE user_id=%s AND product_id=%s", 
                              (uid, product_id), fetchall=True)
 
         if result:
             now = datetime.datetime.now()
             now_time = now.strftime("%y-%m-%d %H:%M:%S")
-            execute_query("UPDATE product_view SET date=? WHERE user_id=? AND product_id=?",
+            execute_query("UPDATE product_view SET date=%s WHERE user_id=%s AND product_id=%s",
                         (now_time, uid, product_id), commit=True)
         else:
-            execute_query("INSERT INTO product_view(user_id, product_id) VALUES(?, ?)", 
+            execute_query("INSERT INTO product_view(user_id, product_id) VALUES(%s, %s)", 
                         (uid, product_id), commit=True)
 
     form = OrderForm(request.form)
@@ -962,11 +962,11 @@ def all_products():
     category = request.args.get('category', None)
 
     if category:
-        products = execute_query("SELECT * FROM products WHERE category=? ORDER BY id ASC", 
+        products = execute_query("SELECT * FROM products WHERE category=%s ORDER BY id ASC", 
                                (category,), fetchall=True)
         category_title = category.capitalize()
     else:
-        products = execute_query("SELECT * FROM products ORDER BY id ASC", fetchall=True)
+        products = execute_query("SELECT * FROM products ORDER BY id ASC", (), fetchall=True)
         category_title = "Tous les produits"
 
     return render_template('category.html', products=products, form=form, category=category_title)
@@ -975,5 +975,5 @@ def all_products():
 def brands():
     form = OrderForm(request.form)
     # This is a placeholder - in a real app, you'd have brand information in the database
-    products = execute_query("SELECT * FROM products ORDER BY RANDOM() LIMIT 8", fetchall=True)
+    products = execute_query("SELECT * FROM products ORDER BY RAND() LIMIT 8", (), fetchall=True)
     return render_template('category.html', products=products, form=form, category="Marques")
