@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmation de commande</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 20px; text-align: center; color: #666; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Commande confirmée !</h1>
+        </div>
+        <div class="content">
+            <h2>Bonjour {{ user_name }},</h2>
+            <p>Nous avons bien reçu votre commande. Voici les détails :</p>
+            <div class="order-details">
+                <h3>Détails de la commande :</h3>
+                <p><strong>Produit :</strong> {{ order_details.product_name }}</p>
+                <p><strong>Quantité :</strong> {{ order_details.quantity }}</p>
+                <p><strong>Prix :</strong> {{ order_details.price }}€</p>
+                <p><strong>Livraison :</strong> {{ order_details.delivery_address }}</p>
+            </div>
+            <p>Votre commande sera traitée dans les plus brefs délais.</p>
+        </div>
+        <div class="footer">
+            <p>Merci de votre confiance !</p>
+            <p>L'équipe RetailShop</p>
+        </div>
+    </div>
+</body>
+</html>

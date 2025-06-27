@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenue sur RetailShop</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 20px; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bienvenue sur RetailShop !</h1>
+        </div>
+        <div class="content">
+            <h2>Bonjour {{ user_name }},</h2>
+            <p>Merci de vous être inscrit sur RetailShop ! Votre compte a été créé avec succès.</p>
+            <p>Vous pouvez maintenant :</p>
+            <ul>
+                <li>Parcourir notre catalogue de produits</li>
+                <li>Ajouter des articles à votre panier</li>
+                <li>Passer des commandes en ligne</li>
+            </ul>
+            <p>Nous vous souhaitons une excellente expérience d'achat !</p>
+        </div>
+        <div class="footer">
+            <p>L'équipe RetailShop</p>
+        </div>
+    </div>
+</body>
+</html>

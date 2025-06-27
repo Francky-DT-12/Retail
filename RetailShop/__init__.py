@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, session
+from flask import Flask, redirect, url_for, session, render_template
 from flask_pymysql import MySQL
 from functools import wraps
 from flask_uploads import UploadSet, configure_uploads, IMAGES
@@ -60,7 +60,7 @@ def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
-            return f(*args, *kwargs)
+            return f(*args, **kwargs)
         else:
             return redirect(url_for('login'))
 
@@ -164,5 +164,14 @@ def content_based_filtering(product_id):
     except Exception as e:
         print(f"Error in content_based_filtering: {e}")
         return ''
+
+# Register error handlers
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('errors/500.html'), 500
 
 from RetailShop import routes

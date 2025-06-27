@@ -1018,3 +1018,39 @@ def brands():
     # This is a placeholder - in a real app, you'd have brand information in the database
     products = execute_query("SELECT * FROM products ORDER BY RAND() LIMIT 8", (), fetchall=True)
     return render_template('category.html', products=products, form=form, category="Marques")
+
+@app.route('/admin_search', methods=['GET', 'POST'])
+@is_admin_logged_in
+def admin_search():
+    if request.method == 'GET' and request.args.get('q'):
+        query = request.args.get('q', '').strip()
+        if query:
+            # Search in products
+            products = execute_query(
+                "SELECT * FROM products WHERE pName LIKE %s OR category LIKE %s OR description LIKE %s", 
+                (f'%{query}%', f'%{query}%', f'%{query}%'), 
+                fetchall=True
+            )
+            # Search in users
+            users = execute_query(
+                "SELECT * FROM users WHERE name LIKE %s OR email LIKE %s OR username LIKE %s", 
+                (f'%{query}%', f'%{query}%', f'%{query}%'), 
+                fetchall=True
+            )
+            # Search in orders
+            orders = execute_query(
+                "SELECT * FROM orders WHERE ofname LIKE %s OR oplace LIKE %s", 
+                (f'%{query}%', f'%{query}%'), 
+                fetchall=True
+            )
+            
+            return render_template('pages/search_results.html', 
+                                 products=products or [], 
+                                 users=users or [], 
+                                 orders=orders or [], 
+                                 search_term=query)
+        else:
+            flash('Veuillez entrer un terme de recherche', 'warning')
+            return redirect(url_for('admin'))
+    
+    return redirect(url_for('admin'))
