@@ -1,73 +1,303 @@
 {% extends 'layout.html' %}
 {% block body %}
-<!-- Page Content -->
-<div class="container">
-    <div class="row">
-        <div class="col-lg-3 my-4">
-            <div class="list-group">
-                <a href="/tshirt" class="list-group-item">T-Shirt</a>
-                <a href="/wallet" class="list-group-item">Wallet</a>
-                <a href="/belt" class="list-group-item">Belt</a>
-                <a href="/shoes" class="list-group-item">Shoes</a>
-            </div>
-        </div>
-        <!-- /.col-lg-3 -->
-        <div class="col-lg-9">
-            <div class="row">
-                {% for product in tshirts %}
-                <div class="col-lg-6">
-                    <div class="card mt-4">
-                        <img class="card-img-top img-fluid"
-                             src="/static/image/product/{{product.category}}/{{product.picture}}" alt="">
-                    </div>
-                </div>
-                <!-- /.card -->
-                <div class="col-lg-6">
-                    <div class="card card-outline-secondary my-4">
-                        <div class="card-header">
-                            Product Details
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title">{{ product.pName}}</h3>
-                            <h4>${{ product.price}}</h4>
-                            <p class="card-text">{{ product.description}}</p>
-                            <a href="/{{product.category}}?order={{product.id}}" class="btn btn-success">Order Now</a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-                <!-- /.card -->
 
-            </div>
-            {% if x == '' %}
-            <h2 class="mb-4">No similar product found</h2>
-            {% else%}
-            <h2 class="mb-4">Similar product for you:</h2>
-            <div class="row">
-                {% for product in x[0] %}
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card mb-4">
-                        <a href="/{{product.category}}?view={{product.id}}">
-                            <div class="card-img-top id_{{product.id}}"
-                                 style="background: url('static/image/product/{{product.category}}/{{product.picture}}'); background-repeat:no-repeat; background-size: cover; height:200px;width:100% "></div>
-                        </a>
-                        <div class="card-body">
-                            <h5><a class="card-title" href="/{{product.category}}?view={{product.id}}">{{ product.pName}}</a></h5>
-                            <h4>৳{{product.price}}</h4>
-                        </div>
-                    </div>
-                    <!-- /.card -->
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        <!-- /.col-lg-9 -->
-
-
+<!-- Breadcrumb -->
+<div class="breadcrumb-section">
+    <div class="container">
+        {% for product in tshirts %}
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/{{ product.category }}">{{ product.category|title }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.pName }}</li>
+            </ol>
+        </nav>
+        {% endfor %}
     </div>
-    <!-- /.row -->
-
 </div>
-<!-- /.container -->
+
+<!-- Product Details Section -->
+<section class="product-details-section">
+    <div class="container">
+        {% for product in tshirts %}
+        <div class="product-details-grid">
+            <!-- Product Images -->
+            <div class="product-images">
+                <div class="main-image-container">
+                    <div class="main-image">
+                        <img id="mainProductImage" src="/static/image/product/{{product.category}}/{{product.picture}}" alt="{{ product.pName }}">
+                        <div class="zoom-icon">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="image-thumbnails">
+                    <img class="thumbnail active" src="/static/image/product/{{product.category}}/{{product.picture}}" alt="{{ product.pName }}" onclick="changeMainImage(this.src)">
+                    <img class="thumbnail" src="/static/image/product/{{product.category}}/{{product.picture}}" alt="{{ product.pName }}" onclick="changeMainImage(this.src)">
+                    <img class="thumbnail" src="/static/image/product/{{product.category}}/{{product.picture}}" alt="{{ product.pName }}" onclick="changeMainImage(this.src)">
+                    <img class="thumbnail" src="/static/image/product/{{product.category}}/{{product.picture}}" alt="{{ product.pName }}" onclick="changeMainImage(this.src)">
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <h1 class="product-title">{{ product.pName }}</h1>
+                
+                <!-- Rating -->
+                <div class="rating-section">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <span class="rating-text">4.5/5</span>
+                </div>
+
+                <!-- Price -->
+                <div class="price-section">
+                    <span class="current-price">{{ product.price }}€</span>
+                    <span class="original-price">{{ (product.price * 1.4)|round|int }}€</span>
+                    <span class="discount-badge">-40%</span>
+                </div>
+
+                <!-- Description -->
+                <div class="product-description-section">
+                    <p class="product-description">{{ product.description }}</p>
+                    
+                    <!-- Product Features -->
+                    <div class="product-features">
+                        <div class="feature-item">
+                            <i class="fas fa-shipping-fast"></i>
+                            <span>Free shipping on orders over $50</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-undo"></i>
+                            <span>30-day return policy</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-medal"></i>
+                            <span>Premium quality guarantee</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Selection -->
+                <div class="color-selection">
+                    <h4>Select Colors</h4>
+                    <div class="color-options">
+                        <div class="color-option selected" data-color="olive" style="background-color: #4F5D2F;"></div>
+                        <div class="color-option" data-color="navy" style="background-color: #2B2D42;"></div>
+                        <div class="color-option" data-color="black" style="background-color: #000000;"></div>
+                    </div>
+                </div>
+
+                <!-- Size Selection -->
+                <div class="size-selection">
+                    <h4>Choose Size</h4>
+                    <div class="size-options">
+                        <div class="size-option" data-size="Small">Small</div>
+                        <div class="size-option" data-size="Medium">Medium</div>
+                        <div class="size-option selected" data-size="Large">Large</div>
+                        <div class="size-option" data-size="X-Large">X-Large</div>
+                    </div>
+                </div>
+
+                <!-- Quantity and Add to Cart -->
+                <div class="cart-section">
+                    {% if product.available > 0 %}
+                    <form method="POST" action="{{ url_for('add_to_cart') }}" class="add-to-cart-form">
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <div class="quantity-selector">
+                            <button type="button" class="quantity-btn minus" data-action="decrease">-</button>
+                            <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.available }}" readonly data-max="{{ product.available }}">
+                            <button type="button" class="quantity-btn plus" data-action="increase" data-max="{{ product.available }}">+</button>
+                        </div>
+                        <button type="submit" class="add-to-cart-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                            Add to Cart
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="out-of-stock">
+                        <span class="stock-status out-of-stock">Out of Stock</span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Additional Actions -->
+                    <div class="product-actions">
+                        <button class="action-btn wishlist-btn" title="Add to Wishlist">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="action-btn compare-btn" title="Compare">
+                            <i class="fas fa-balance-scale"></i>
+                        </button>
+                        <button class="action-btn share-btn" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<!-- Rating & Reviews Section -->
+<section class="reviews-section">
+    <div class="container">
+        <div class="reviews-header">
+            <h2>Rating & Reviews</h2>
+            <div class="review-summary">
+                <div class="overall-rating">
+                    <span class="rating-number">4.5</span>
+                    <div class="rating-details">
+                        <div class="stars-large">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="total-reviews">Based on 451 reviews</span>
+                    </div>
+                </div>
+                <div class="rating-breakdown">
+                    <div class="rating-bar">
+                        <span>5</span>
+                        <div class="bar"><div class="fill" style="width: 70%"></div></div>
+                        <span>315</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span>4</span>
+                        <div class="bar"><div class="fill" style="width: 20%"></div></div>
+                        <span>90</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span>3</span>
+                        <div class="bar"><div class="fill" style="width: 7%"></div></div>
+                        <span>32</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span>2</span>
+                        <div class="bar"><div class="fill" style="width: 2%"></div></div>
+                        <span>9</span>
+                    </div>
+                    <div class="rating-bar">
+                        <span>1</span>
+                        <div class="bar"><div class="fill" style="width: 1%"></div></div>
+                        <span>5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="reviews-filters">
+            <button class="filter-btn active" data-filter="all">All Reviews</button>
+            <button class="filter-btn" data-filter="5">5 Stars</button>
+            <button class="filter-btn" data-filter="4">4 Stars</button>
+            <button class="filter-btn" data-filter="3">3 Stars</button>
+            <button class="filter-btn" data-filter="verified">Verified Purchase</button>
+        </div>
+        
+        <div class="reviews-grid">
+            <div class="reviews-list">
+                <h3>All Reviews <span class="review-count">(451)</span></h3>
+                
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <strong>Samantha D.</strong>
+                            <span class="verified-badge"><i class="fas fa-check-circle"></i></span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text">"I absolutely love this t-shirt! The design is unique and the fabric feels so comfortable. As a fellow designer, I appreciate the attention to detail. It's become my favorite go-to shirt."</p>
+                    <span class="review-date">Posted on August 14, 2023</span>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <strong>Alex M.</strong>
+                            <span class="verified-badge"><i class="fas fa-check-circle"></i></span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text">"The shirt exceeded my expectations! The colors are vibrant and the print quality is top-notch. Being a UX designer myself, I'm quite picky about aesthetics, and this t-shirt definitely passes the test."</p>
+                    <span class="review-date">Posted on August 15, 2023</span>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <strong>Ethan R.</strong>
+                            <span class="verified-badge"><i class="fas fa-check-circle"></i></span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text">"This t-shirt is a must-have for anyone who appreciates good design. The minimalistic yet stylish design caught my eye, and the fit is perfect. I can see the designer's touch in every aspect of this shirt."</p>
+                    <span class="review-date">Posted on August 16, 2023</span>
+                </div>
+
+                <button class="load-more-btn">Load More Reviews</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- You Might Also Like Section -->
+{% if x != '' %}
+<section class="related-products-section">
+    <div class="container">
+        <h2 class="section-title">YOU MIGHT ALSO LIKE</h2>
+        <div class="products-grid-4">
+            {% for product in x[0][:4] %}
+            <div class="product-card-modern">
+                <a href="/{{product.category}}?view={{product.id}}" class="product-link">
+                    <div class="product-image-modern" style="background: url('static/image/product/{{product.category}}/{{product.picture}}') center/cover;"></div>
+                    <div class="product-info-modern">
+                        <h5 class="product-name-modern">{{ product.pName }}</h5>
+                        <div class="rating-modern">
+                            <div class="stars-modern">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text-modern">3.5/5</span>
+                        </div>
+                        <div class="price-modern">
+                            <span class="current-price-modern">{{ product.price }}€</span>
+                            <span class="original-price-modern">{{ (product.price * 1.3)|round|int }}€</span>
+                            <span class="discount-modern">-30%</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {% endblock %}

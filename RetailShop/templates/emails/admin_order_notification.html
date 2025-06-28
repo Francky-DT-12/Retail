@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvelle commande</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #dc3545; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .order-details { background: white; padding: 15px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Nouvelle commande reçue</h1>
+        </div>
+        <div class="content">
+            <h2>Nouvelle commande à traiter</h2>
+            <div class="order-details">
+                <h3>Détails :</h3>
+                <p><strong>Client :</strong> {{ order_details.customer_name }}</p>
+                <p><strong>Email :</strong> {{ order_details.customer_email }}</p>
+                <p><strong>Produit :</strong> {{ order_details.product_name }}</p>
+                <p><strong>Quantité :</strong> {{ order_details.quantity }}</p>
+                <p><strong>Prix :</strong> {{ order_details.price }}€</p>
+                <p><strong>Adresse :</strong> {{ order_details.delivery_address }}</p>
+                <p><strong>Date :</strong> {{ order_details.order_date }}</p>
+            </div>
+            <p>Connectez-vous à l'interface admin pour traiter cette commande.</p>
+        </div>
+    </div>
+</body>
+</html>

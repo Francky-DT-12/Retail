@@ -1,3 +1,4 @@
+Prérequis : Python 3.8.x
 # E-Commerce-Website-Using-Python
 
 ## Get In Touch
@@ -22,6 +23,84 @@ Hello friends, This is my first full e-commerce project with Python-Flask. This 
 ### Back-End
   (i) Python - Flask <br>
   (ii) MySQL <br>
+
+## Database Setup
+
+The application requires a MySQL database to function properly. Follow these steps to set up the database:
+
+1. Make sure MySQL server is installed and running on your system.
+
+2. Create the database and user by running the setup_db.sql script:
+   ```bash
+   mysql -u root -p < setup_db.sql
+   ```
+   This will:
+   - Create a database named 'shoptub'
+   - Create a user 'webapp' with password 'motdepassefort'
+   - Grant all privileges on the 'shoptub' database to the 'webapp' user
+   - Create the necessary tables and insert sample data
+
+3. Verify that the database was created successfully:
+   ```bash
+   mysql -u webapp -pmotdepassefort -e "SHOW DATABASES;"
+   ```
+   You should see 'shoptub' in the list of databases.
+
+## Running the Application
+
+1. Install the required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Set the Flask application environment variable:
+   ```bash
+   export FLASK_APP=app.py
+   ```
+
+3. Run the application:
+   ```bash
+   flask run
+   ```
+
+4. Access the application in your web browser at http://127.0.0.1:5000/
+
+## Troubleshooting Database Connection Issues
+
+If you encounter database connection issues, check the following:
+
+1. Make sure the MySQL server is running:
+   ```bash
+   sudo service mysql status
+   ```
+   or
+   ```bash
+   sudo systemctl status mysql
+   ```
+
+2. Verify that the 'shoptub' database exists:
+   ```bash
+   mysql -u root -p -e "SHOW DATABASES;"
+   ```
+
+3. Verify that the 'webapp' user has access to the 'shoptub' database:
+   ```bash
+   mysql -u webapp -pmotdepassefort -e "SHOW DATABASES;"
+   ```
+
+4. Run the test_db_connection.py script to check the database connection:
+   ```bash
+   python test_db_connection.py
+   ```
+
+5. If all else fails, you can recreate the database by running the setup_db.sql script again:
+   ```bash
+   mysql -u root -p < setup_db.sql
+   ```
+6. TO add test data, you can run the `test_data.sql` script:
+   ```bash
+   mysql -u webapp -p'motdepassefort' shoptub < more_data.sql
+   ```
 
 ## Key Features
 ### Public User

@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm fixed-top">
-    <a class="navbar-brand" href="/">Men's Hut</a>
+    <a class="navbar-brand" href="/">RetailShop</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
             aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -15,12 +15,45 @@
         </div>
         <ul class="navbar-nav ml-auto">
             {% if session.logged_in %}
-            <li class="nav-item"><a href="/" class="nav-link"><span class=""></span> Acueil</a></li>
-            <li class="nav-item"><a href="/profile?user={{session.uid}}" class="nav-link"><span class=""></span>DOLV</a>
+            <li class="nav-item"><a href="/" class="nav-link"><span class=""></span> Accueil</a></li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLoggedIn" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Shop
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownLoggedIn">
+                    <a class="dropdown-item" href="/mens">Hommes</a>
+                    <a class="dropdown-item" href="/womens">Femmes</a>
+                    <a class="dropdown-item" href="/tshirt">T-shirts</a>
+                    <a class="dropdown-item" href="/shoes">Chaussures</a>
+                    <a class="dropdown-item" href="/belt">Ceintures</a>
+                    <a class="dropdown-item" href="/wallet">Portefeuilles</a>
+                </div>
             </li>
-            <li class="nav-item"><a href="/out" class="nav-link"><span class=""></span> Deconnexion</a></li>
+            <li class="nav-item"><a href="/sales" class="nav-link">Promotions</a></li>
+            <li class="nav-item"><a href="/arrivals" class="nav-link">Nouveautés</a></li>
+            <li class="nav-item"><a href="/brands" class="nav-link">Marques</a></li>
+            <li class="nav-item"><a href="/profile?user={{session.uid}}" class="nav-link"><span class=""></span>Profile</a>
+            </li>
+            <li class="nav-item"><a href="/cart" class="nav-link"><i class="fas fa-shopping-cart"></i></a></li>
+            <li class="nav-item"><a href="/out" class="nav-link"><span class=""></span> Déconnexion</a></li>
             {% else %}
             <li class="nav-item"><a href="/" class="nav-link"><span class=""></span> Accueil </a></li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownGuest" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Shop
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownGuest">
+                    <a class="dropdown-item" href="/mens">Hommes</a>
+                    <a class="dropdown-item" href="/womens">Femmes</a>
+                    <a class="dropdown-item" href="/tshirt">T-shirts</a>
+                    <a class="dropdown-item" href="/shoes">Chaussures</a>
+                    <a class="dropdown-item" href="/belt">Ceintures</a>
+                    <a class="dropdown-item" href="/wallet">Portefeuilles</a>
+                </div>
+            </li>
+            <li class="nav-item"><a href="/sales" class="nav-link">Promotions</a></li>
+            <li class="nav-item"><a href="/arrivals" class="nav-link">Nouveautés</a></li>
+            <li class="nav-item"><a href="/brands" class="nav-link">Marques</a></li>
             <li class="nav-item"><a href="/register" class="nav-link"><span class=""></span> Inscription</a></li>
             <li class="nav-item"><a href="/login" class="nav-link"><span class=""></span> Connexion</a></li>
             {% endif %}

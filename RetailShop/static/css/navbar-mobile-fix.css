@@ -1,0 +1,300 @@
+/* ===========================================
+   MODERN NAVBAR MOBILE FIXES
+   Corrections spécifiques pour la navbar moderne
+   =========================================== */
+
+/* Ensure modern navbar works correctly on mobile */
+@media (max-width: 768px) {
+    /* Override any conflicting styles */
+    .header {
+        position: relative;
+        z-index: 100;
+    }
+    
+    .navbar {
+        padding: 10px 0 !important;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    /* Ensure container behaves correctly */
+    .navbar .container {
+        position: relative;
+    }
+    
+    /* Nav content mobile layout */
+    .nav-content {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        height: 70px !important;
+        width: 100% !important;
+        gap: 15px !important;
+        position: relative;
+    }
+    
+    /* Logo positioning */
+    .logo {
+        order: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        height: auto !important;
+        margin: 0 !important;
+        flex-shrink: 0;
+    }
+    
+    .logo h1 {
+        font-size: 24px !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Mobile menu toggle positioning */
+    .mobile-menu-toggle {
+        order: 3 !important;
+        display: flex !important;
+        margin-left: auto;
+        position: relative;
+        z-index: 1001;
+    }
+    
+    /* Nav menu container mobile behavior */
+    .nav-menu-container {
+        order: 2 !important;
+        position: absolute !important;
+        top: calc(100% + 10px) !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: white !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transform: translateY(-10px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 1000 !important;
+        padding: 25px !important;
+        margin: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        align-items: stretch !important;
+    }
+    
+    .nav-menu-container.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+    }
+    
+    /* Nav menu mobile styles */
+    .nav-menu {
+        list-style: none !important;
+        margin: 0 0 20px 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+    }
+    
+    .nav-menu li {
+        width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        align-items: stretch !important;
+    }
+    
+    .nav-menu li:last-child {
+        border-bottom: none !important;
+    }
+    
+    .nav-menu a {
+        display: block !important;
+        padding: 16px 0 !important;
+        color: #000 !important;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+        font-size: 16px !important;
+        text-align: left !important;
+        transition: color 0.3s ease !important;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        margin: 0 !important;
+    }
+    
+    .nav-menu a:hover {
+        color: #007bff !important;
+        background-color: transparent !important;
+    }
+    
+    /* Search container mobile */
+    .search-container {
+        width: 100% !important;
+        margin: 0 0 20px 0 !important;
+        max-width: 100% !important;
+        order: unset !important;
+    }
+    
+    .search-form {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    .search-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        position: relative !important;
+        margin: 0 !important;
+    }
+    
+    .search-box input {
+        width: 100% !important;
+        padding: 12px 45px 12px 15px !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 8px !important;
+        font-size: 16px !important;
+        background: #fafafa !important;
+        transition: all 0.3s !important;
+    }
+    
+    .search-box input:focus {
+        border-color: #007bff !important;
+        background: white !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1) !important;
+    }
+    
+    .search-box i {
+        position: absolute !important;
+        right: 15px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: #666 !important;
+        font-size: 16px !important;
+    }
+    
+    /* Nav icons mobile */
+    .nav-icons {
+        display: flex !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        gap: 12px !important;
+        margin: 0 !important;
+        padding: 15px 0 0 0 !important;
+        border-top: 1px solid #f0f0f0 !important;
+        width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .icon-link {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 10px 8px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        text-decoration: none !important;
+        color: #000 !important;
+        background: transparent !important;
+        flex: 1 !important;
+        min-width: 60px !important;
+        max-width: 90px !important;
+        margin: 0 !important;
+        height: auto !important;
+        border: none !important;
+    }
+    
+    .icon-link:hover {
+        background-color: #f8f9fa !important;
+        color: #007bff !important;
+        transform: translateY(-2px) !important;
+        text-decoration: none !important;
+    }
+    
+    .icon-link i {
+        font-size: 18px !important;
+        margin-bottom: 4px !important;
+        color: inherit !important;
+    }
+    
+    .icon-text {
+        font-size: 11px !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        color: inherit !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .nav-content {
+        height: 60px !important;
+        gap: 10px !important;
+    }
+    
+    .logo h1 {
+        font-size: 20px !important;
+    }
+    
+    .nav-menu-container {
+        padding: 20px !important;
+    }
+    
+    .search-box input {
+        padding: 10px 40px 10px 12px !important;
+        font-size: 15px !important;
+    }
+    
+    .icon-link {
+        padding: 8px 6px !important;
+        min-width: 50px !important;
+        max-width: 70px !important;
+    }
+    
+    .icon-link i {
+        font-size: 16px !important;
+    }
+    
+    .icon-text {
+        font-size: 10px !important;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
+    .nav-content {
+        height: 50px !important;
+    }
+    
+    .logo h1 {
+        font-size: 20px !important;
+    }
+    
+    .nav-menu-container {
+        padding: 15px !important;
+    }
+    
+    .nav-menu a {
+        padding: 12px 0 !important;
+    }
+    
+    .icon-link {
+        padding: 6px 4px !important;
+    }
+}
